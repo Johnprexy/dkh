@@ -710,7 +710,7 @@ function Videos() {
     {
       id: "iOkXFJsHvdg",
       tag: "Doctrine · Short Clip",
-      title: ""Polygamy Is Not for Christians" — Prophet Dr. Kunle Hamilton",
+      title: "Polygamy Is Not for Christians — Prophet Dr. Kunle Hamilton",
       src: "CCC PraiseVille · YouTube"
     },
     {
