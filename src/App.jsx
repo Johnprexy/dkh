@@ -466,7 +466,7 @@ function Nav() {
       <a className="logo" href="#home">Dr. Kunle <em>Hamilton</em></a>
       <nav className="nav-links">
         {links.map(l => <a key={l} className="nl" href={`#${l.toLowerCase()}`}>{l}</a>)}
-        <a className="nav-cta" href="#contact">Book Session</a>
+        <a className="nav-cta" href="#contact">Invite Dr. Hamilton</a>
       </nav>
       <button className="ham" onClick={() => setOpen(!open)} aria-label="Menu">
         <div className="hl" style={open ? { transform: "rotate(45deg) translate(5px,5px)" } : {}} />
@@ -489,7 +489,7 @@ function Nav() {
             </motion.a>
           ))}
           <div className="mob-sep" />
-          <a className="nav-cta" href="#contact" onClick={() => setOpen(false)}>Book a Session</a>
+          <a className="nav-cta" href="#contact" onClick={() => setOpen(false)}>Invite Dr. Hamilton</a>
         </motion.div>
       )}
     </AnimatePresence>
@@ -553,14 +553,14 @@ function Hero() {
         <motion.p className="hero-sub"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.35, duration: .8 }}>
-          Veteran journalist. International author. Prophet of the Celestial Church of Christ. Founder of CCC PraiseVille & ShaddaiVille Ministries — a life poured out for God across five nations.
+          Nigeria's foremost prophet-scholar. Veteran journalist. Bestselling author. Speaker. The man whose philosophy degree led him to God — and whose faith is reshaping nations.
         </motion.p>
 
         <motion.div className="hero-actions"
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5, duration: .7 }}>
-          <a className="b-gold" href="#about">Discover His Story</a>
-          <a className="b-ghost" href="#videos">Watch Teachings</a>
+          <a className="b-gold" href="#about">His Story</a>
+          <a className="b-ghost" href="#speaking">Book as Speaker</a>
         </motion.div>
       </div>
 
@@ -576,7 +576,7 @@ function Hero() {
 }
 
 /* ─── MARQUEE ────────────────────────────────────────────────────────────── */
-const MQI = ["Prophet", "Scholar", "Media Veteran", "Bestselling Author", "Senior Shepherd", "PraiseVille Global", "ShaddaiVille International", "5 Nations", "40 Years of Ministry", "Berlin · Lagos · London · USA"];
+const MQI = ["Prophet · Scholar · Author", "Veteran Journalist", "40 Years of Ministry", "International Speaker", "Newspaper Editor", "Life Coach", "PR & Image Consultant", "Lambert Academic Publishing", "18 Countries", "Nigeria · Germany · UK · USA · Canada", "University of Lagos Alumni"];
 function Marquee() {
   const all = [...MQI, ...MQI];
   return (
@@ -592,7 +592,7 @@ function Marquee() {
 function Stats() {
   return (
     <div className="stats-strip">
-      {[{ n: "40", s: "+", l: "Years in Ministry" }, { n: "5", s: "", l: "Nations of Impact" }, { n: "2", s: "", l: "Thriving Ministries" }, { n: "18", s: "", l: "Countries Published" }].map((s, i) => (
+      {[{ n: "40", s: "+", l: "Years of Ministry & Media" }, { n: "18", s: "", l: "Countries — Books Published" }, { n: "5", s: "", l: "Nations of Impact" }, { n: "1985", s: "", l: "First Class Graduate, UNILAG" }].map((s, i) => (
         <motion.div key={i} className="stat"
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ delay: i * .1, duration: .7 }}>
@@ -619,24 +619,24 @@ function About() {
         </div>
       </R>
       <div className="about-body">
-        <R><div className="stag light">The Man Behind the Ministry</div></R>
+        <R><div className="stag light">The Story Behind the Name</div></R>
         <div>
-          <ClipLine text="A Philosopher" className="sh2 light" delay={.1} />
-          <ClipLine text="Who Found" className="sh2 light" delay={.2} />
-          <ClipLine text="God." className="sh2 light" delay={.3} italic />
+          <ClipLine text="Prophet." className="sh2 light" delay={.1} />
+          <ClipLine text="Scholar." className="sh2 light" delay={.2} />
+          <ClipLine text="Voice." className="sh2 light" delay={.3} italic />
         </div>
         <R delay={.2}>
           <div style={{ height: 1, background: "var(--border-d)", margin: "2rem 0" }} />
-          <p>Dr. Kunle Hamilton is one of Nigeria's most remarkable multi-disciplinary voices — <strong>a Prophet of the Celestial Church of Christ</strong>, veteran journalist, media executive, and international author whose reach spans four continents.</p>
-          <p>A <strong>Philosophy first-class graduate</strong> (Best Student, 1985) and Mass Communication scholar from the University of Lagos, he fuses rigorous academic thought with prophetic grace.</p>
+          <p>Dr. Kunle Hamilton is one of Nigeria's most remarkable public figures — <strong>a prophet, a scholar, a journalist, a speaker and an author</strong> whose singular journey from a Philosophy degree at the University of Lagos to global ministry leadership is unlike any other.</p>
+          <p>A <strong>first-class Philosophy graduate</strong> (Best Student, 1985) and Mass Communication scholar, he went on to become a newspaper editor, PR consultant, CEO, and international author — while simultaneously building a ministry that spans five nations. He is the living proof that faith and intellect are not opposites.</p>
         </R>
         <R delay={.3}>
           <div className="roles">
             {[
+              ["Newspaper Editor & PR Veteran", "35+ years in Nigerian media, advertising & reputation management"],
+              ["International Author", "Lambert Academic Publishing — 18 countries across Europe"],
               ["Senior Shepherd", "CCC PraiseVille Global — Nigeria · Germany · UK · USA"],
               ["Founder & President", "ShaddaiVille Ministries International — since 2007"],
-              ["CEO", "Virgin Outdoor — Reputation & Brand Management, Lagos"],
-              ["International Author", "Published in 18 countries by Lambert Academic Publishing"],
             ].map(([t, v], i) => (
               <div className="role" key={i}>
                 <div className="role-dot" />
@@ -669,8 +669,9 @@ function Ministries() {
   return (
     <section className="ministries" id="ministries">
       <div className="min-hd">
-        <R><div className="stag dark">Twin Pillars of Purpose</div></R>
-        <ClipLine text="The Ministries" className="sh2 dark" delay={.1} />
+        <R><div className="stag dark">His Legacy in Action</div></R>
+        <ClipLine text="Dr. Hamilton's" className="sh2 dark" delay={.1} />
+        <ClipLine text="Ministries" className="sh2 dark" delay={.18} italic />
       </div>
       <div className="min-panels">
         {panels.map((m, i) => (
@@ -685,7 +686,7 @@ function Ministries() {
                 <div className="min-facts">
                   {m.facts.map((f, j) => <div key={j}><div className="mf-n">{f.n}</div><div className="mf-l">{f.l}</div></div>)}
                 </div>
-                <a className="min-link" href="#contact">Learn More →</a>
+                <a className="min-link" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer">Visit Website →</a>
               </div>
             </div>
           </R>
@@ -725,12 +726,12 @@ function Videos() {
     <section className="videos" id="videos">
       <div className="vids-top">
         <div className="vids-hd">
-          <R><div className="stag light">Teachings · Sermons · Interviews</div></R>
-          <ClipLine text="Watch" className="sh2 light" delay={.1} />
-          <ClipLine text="Dr. Hamilton" className="sh2 light" delay={.18} />
-          <ClipLine text="In Action" className="sh2 light" delay={.26} italic />
+          <R><div className="stag light">Sermons · Teachings · Interviews</div></R>
+          <ClipLine text="Dr. Hamilton" className="sh2 light" delay={.1} />
+          <ClipLine text="Live &" className="sh2 light" delay={.18} />
+          <ClipLine text="Unfiltered" className="sh2 light" delay={.26} italic />
           <R delay={.3}><div style={{ marginTop: "2rem", display:"flex", flexDirection:"column", gap:".8rem" }}>
-            <a className="b-gold" href="#contact">Attend a Service</a>
+            <a className="b-gold" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer">Visit shaddaiville.org</a>
             <a href="https://www.youtube.com/@cccpraiseville" target="_blank" rel="noopener noreferrer"
               style={{ fontSize:".62rem", fontWeight:700, letterSpacing:".14em", textTransform:"uppercase", color:"#93C5FD", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:".5rem" }}>
               ▶ Subscribe on YouTube →
@@ -770,15 +771,15 @@ function Books() {
   return (
     <section className="books" id="books">
       <div className="books-hd">
-        <R><div className="stag dark">Written Works</div></R>
-        <ClipLine text="Books &" className="sh2 dark" delay={.1} />
-        <ClipLine text="Publications" className="sh2 dark" delay={.18} italic />
+        <R><div className="stag dark">His Written Legacy</div></R>
+        <ClipLine text="Books That" className="sh2 dark" delay={.1} />
+        <ClipLine text="Cross Borders" className="sh2 dark" delay={.18} italic />
       </div>
       <div className="books-grid">
         {[
-          { tag: "Leadership", title: "Releasing the Eagle in You", p: "An eight-chapter inspirational work on leadership and self-actualization — unlocking the greatness God placed within every person. Published internationally across 18 countries." },
-          { tag: "Philosophy", title: "Journey to Understanding", p: "A philosophical investigation of how style and content impact the spoken word, using the church and Raypower 100.5 FM as its remarkable canvas." },
-          { tag: "Ministry", title: "The ShaddaiVille Vision", p: "Dr. Hamilton's framework for discipleship-driven ministry that transcends denominational walls — building leaders and moral beacons across faith traditions and nations." },
+          { tag: "Leadership · Self-Development", title: "Releasing the Eagle in You", p: "Dr. Hamilton's landmark work on leadership and self-actualization. An eight-chapter guide to unlocking the God-given greatness inside every person. Published by Lambert Academic Publishing across 18 countries in Europe." },
+          { tag: "Philosophy · Communication", title: "Journey to Understanding", p: "A rare academic work from a prophet-scholar — investigating how style and content shape understanding, using his Sunday congregation and his radio show on Raypower 100.5 FM as the living laboratory." },
+          { tag: "Faith · Nation-Building", title: "The ShaddaiVille Vision", p: "The blueprint behind a ministry that has trained Christians, Muslims and secular professionals free of charge across five nations since 2007. A framework for discipleship that transcends church walls." },
         ].map((b, i) => (
           <R key={i} delay={i * .12}>
             <div className="bk">
@@ -786,7 +787,7 @@ function Books() {
               <div className="bk-tag">{b.tag}</div>
               <div className="bk-title">{b.title}</div>
               <div className="bk-p">{b.p}</div>
-              <a className="bk-cta" href="#contact">Order a Copy →</a>
+              <a className="bk-cta" href="#contact">Request a Copy →</a>
             </div>
           </R>
         ))}
@@ -798,25 +799,33 @@ function Books() {
 /* ─── SPEAKING ───────────────────────────────────────────────────────────── */
 function Speaking() {
   const evs = [
-    { d: "12", m: "Apr", name: "Festival of the Word — Annual Harvest", loc: "Lagos, Nigeria", type: "Worship & Teaching" },
-    { d: "03", m: "May", name: "ShaddaiVille UK Leadership Retreat", loc: "London, United Kingdom", type: "Leadership Academy" },
-    { d: "21", m: "Jun", name: "Teenagers' Motivational Summit", loc: "Berlin, Germany", type: "Youth Empowerment" },
-    { d: "08", m: "Aug", name: "Ephphatha Non-Denominational Crusade", loc: "Lagos, Nigeria", type: "Evangelism" },
-    { d: "15", m: "Sep", name: "Media & Ministry — Public Lecture", loc: "University of Lagos", type: "Academic Talk" },
+    { d: "07", m: "Sep", name: "Festival of the Word 8.0 — Annual Harvest", loc: "Yaba, Lagos, Nigeria", type: "Church · Keynote" },
+    { d: "Oct", m: "2025", name: "Celestial Showers Convention — 10XBetter", loc: "CCC PraiseVille, Lagos", type: "Leadership · Evangelism" },
+    { d: "TBC", m: "2026", name: "ShaddaiVille Leadership Academy — UK Cohort", loc: "London, United Kingdom", type: "Leadership Training" },
+    { d: "TBC", m: "2026", name: "Corporate Devotional & Leadership Keynote", loc: "Lagos Business Community", type: "Corporate Speaking" },
+    { d: "TBC", m: "2026", name: "Teenagers' Motivational Retreat — Berlin", loc: "Berlin, Germany", type: "Youth Empowerment" },
   ];
   return (
     <section className="speaking" id="speaking">
       <div className="sp-left">
-        <R><div className="stag light">Events & Engagements</div></R>
-        <ClipLine text="Speaking &" className="sh2 light" delay={.1} />
-        <ClipLine text="Appearances" className="sh2 light" delay={.18} italic />
-        <R delay={.25}>
+        <R><div className="stag light">Speaking & Engagements</div></R>
+        <ClipLine text="Book Dr." className="sh2 light" delay={.1} />
+        <ClipLine text="Hamilton" className="sh2 light" delay={.18} />
+        <ClipLine text="to Speak" className="sh2 light" delay={.26} italic />
+        <R delay={.2}>
+          <p style={{ fontSize:".85rem", fontWeight:300, lineHeight:1.8, color:"var(--muted-d)", marginBottom:"1.5rem" }}>Dr. Hamilton speaks at churches, conferences, corporate events, universities and leadership summits. His rare blend of academic rigour, prophetic authority and media experience makes every engagement unforgettable.</p>
+          <p style={{ fontSize:".78rem", fontWeight:300, lineHeight:1.7, color:"var(--muted-d)", marginBottom:"2rem" }}>Available for: <strong style={{color:"var(--white)"}}>Keynotes · Church Revivals · Leadership Conferences · University Lectures · Media Appearances · Corporate Devotionals</strong></p>
+        </R>
+        <R delay={.3}>
           <div className="sp-pull">
-            <div className="sp-qt">"The responsibility of religious leaders is to guide young people towards righteousness — not to encourage them to chase fame through questionable means."</div>
+            <div className="sp-qt">"The responsibility of leaders is to guide young people toward righteousness — not to encourage them to chase fame through questionable means."</div>
             <div className="sp-qby">— Dr. Kunle Hamilton</div>
           </div>
         </R>
-        <R delay={.35}><div style={{ marginTop: "2rem" }}><a className="b-gold" href="#contact">Invite Dr. Hamilton</a></div></R>
+        <R delay={.4}><div style={{ marginTop: "2rem", display:"flex", flexDirection:"column", gap:".8rem" }}>
+          <a className="b-gold" href="#contact">Send a Speaking Request</a>
+          <span style={{ fontSize:".6rem", fontWeight:300, color:"var(--muted-d)", letterSpacing:".05em" }}>Response within 48 hours</span>
+        </div></R>
       </div>
       <div className="ev-list">
         {evs.map((e, i) => (
@@ -856,14 +865,15 @@ function Contact() {
       </R>
       <R delay={.15}>
         <div className="ct-form">
-          <div className="stag dark">Get in Touch</div>
-          <ClipLine text="Send a" className="sh2 dark" delay={.1} />
-          <ClipLine text="Message" className="sh2 dark" delay={.18} italic />
+          <div className="stag dark">Work With Dr. Hamilton</div>
+          <ClipLine text="Let's" className="sh2 dark" delay={.1} />
+          <ClipLine text="Start a" className="sh2 dark" delay={.18} />
+          <ClipLine text="Conversation" className="sh2 dark" delay={.26} italic />
           <div className="ct-deets">
             {[
-              ["Ministry", "CCC PraiseVille Global · ShaddaiVille International"],
-              ["Based In", "Lagos, Nigeria · Berlin · London · USA"],
-              ["Media & PR", "Virgin Outdoor Communications, Lagos"],
+              ["Speaking & Events", "Book Dr. Hamilton for your church, conference or corporate event"],
+              ["Books & Media", "Interview requests, press kit & publications — Virgin Outdoor, Lagos"],
+              ["Ministries", "CCC PraiseVille · ShaddaiVille — visit shaddaiville.org"],
             ].map(([l, v], i) => (
               <div className="ctd" key={i}>
                 <div className="ctd-gold-line" />
@@ -885,16 +895,17 @@ function Contact() {
               </div>
               <div className="cfg"><label className="cfl">Nature of Inquiry</label>
                 <select className="cfs" value={f.inquiry} onChange={e => setF({ ...f, inquiry: e.target.value })}>
-                  <option value="speaking">Speaking Engagement</option>
-                  <option value="ministry">Ministry / Church</option>
+                  <option value="speaking">Speaking / Keynote Booking</option>
+                  <option value="conference">Conference or Summit</option>
+                  <option value="corporate">Corporate Devotional / Event</option>
+                  <option value="media">Media Interview / Press</option>
                   <option value="books">Books & Publications</option>
-                  <option value="media">Media / Interview</option>
-                  <option value="leadership">ShaddaiVille Leadership Academy</option>
+                  <option value="ministry">Ministry Partnership</option>
                   <option value="general">General Enquiry</option>
                 </select>
               </div>
               <div className="cfg"><label className="cfl">Message</label><textarea className="cfta" placeholder="Your message..." value={f.msg} onChange={e => setF({ ...f, msg: e.target.value })} required /></div>
-              <button className="cfbtn">Send Message →</button>
+              <button className="cfbtn">Send Request →</button>
             </form>
           )}
         </div>
@@ -910,26 +921,26 @@ function Footer() {
       <div className="ft-top">
         <div className="ft-col">
           <div className="ft-logo">Dr. Kunle <span>Hamilton</span></div>
-          <div className="ft-tagline">Prophet · Scholar · Shepherd · Author · Media Veteran. Serving God and humanity across five nations since 1985.</div>
+          <div className="ft-tagline">Nigeria's foremost prophet-scholar. Veteran journalist, international author, leadership speaker and founder of twin ministries spanning five nations. The man. The brand. The legacy.</div>
           <div className="ft-gold" />
         </div>
         <div className="ft-col">
           <div className="ft-ch">Main Site</div>
-          {["About", "Videos", "Books", "Speaking", "Contact"].map(l => <a key={l} className="ftl" href={`#${l.toLowerCase()}`}>{l}</a>)}
+          {[["About", "#about"], ["His Books", "#books"], ["Speaking", "#speaking"], ["Videos", "#videos"], ["Contact", "#contact"]].map(([l, h]) => <a key={l} className="ftl" href={h}>{l}</a>)}
         </div>
         <div className="ft-col">
-          <div className="ft-ch">CCC PraiseVille</div>
-          {["About PraiseVille", "Sunday Services", "Festival of the Word", "Pastoral Team", "Join Us"].map(l => <a key={l} className="ftl" href="#ministries">{l}</a>)}
+          <div className="ft-ch">Media & Press</div>
+          {[["Book as Speaker", "#speaking"], ["Request Interview", "#contact"], ["Speaking Topics", "#speaking"], ["Press Biography", "#about"], ["CCC PraiseVille YouTube", "https://www.youtube.com/@cccpraiseville"]].map(([l, h]) => <a key={l} className="ftl" href={h} target={h.startsWith("http") ? "_blank" : undefined} rel={h.startsWith("http") ? "noopener noreferrer" : undefined}>{l}</a>)}
         </div>
         <div className="ft-col">
-          <div className="ft-ch">ShaddaiVille</div>
-          {["About ShaddaiVille", "Leadership Academy", "Teens Academy", "Outreach", "Partner With Us"].map(l => <a key={l} className="ftl" href="#ministries">{l}</a>)}
-          <a className="ftl" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer" style={{ color:"#93C5FD", marginTop:".5rem" }}>Visit shaddaiville.org →</a>
+          <div className="ft-ch">Ministries</div>
+          {[["CCC PraiseVille Global", "#ministries"], ["ShaddaiVille Int'l", "#ministries"], ["Festival of the Word", "#videos"], ["Leadership Academy", "#ministries"], ["Outreach & Missions", "#ministries"]].map(([l, h]) => <a key={l} className="ftl" href={h}>{l}</a>)}
+          <a className="ftl" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer" style={{ color:"#93C5FD" }}>→ shaddaiville.org</a>
         </div>
       </div>
       <div className="ft-bottom">
         <div className="ft-copy">© 2026 Dr. Kunle Hamilton · All Rights Reserved</div>
-        <div className="ft-copy">PraiseVille Global · ShaddaiVille Ministries International</div>
+        <div className="ft-copy">kunlehamilton.com · The Official Personal Website</div>
       </div>
     </footer>
   );
