@@ -306,6 +306,61 @@ const Styles = () => (
     .bk-cta:hover{color:var(--gold);border-color:var(--gold);gap:.9rem}
     @media(max-width:768px){.bk-cta{cursor:auto}}
 
+
+    /* ── PRESS & PUBLICATIONS ── dark ink bg */
+    .press { background:var(--ink); border-top:1px solid var(--border-d); }
+    .press-hd { padding:6rem 7vw; border-bottom:1px solid var(--border-d); display:grid; grid-template-columns:1fr 1.5fr; gap:4rem; align-items:end; }
+    @media(max-width:900px){ .press-hd { grid-template-columns:1fr; gap:2rem; } }
+    .press-lead { font-size:clamp(.85rem,1.3vw,.92rem); font-weight:300; line-height:1.85; color:var(--muted-d); max-width:520px; }
+    .press-lead strong { color:var(--white); font-weight:500; }
+
+    /* Glitterati hero banner */
+    .glitterati-banner {
+      margin:0; border-bottom:1px solid var(--border-d);
+      background:var(--ink2); padding:3rem 7vw;
+      display:grid; grid-template-columns:auto 1fr; gap:3rem; align-items:center;
+    }
+    @media(max-width:760px){ .glitterati-banner { grid-template-columns:1fr; gap:1.5rem; } }
+    .gb-badge {
+      width:110px; height:110px; border:1.5px solid var(--gold);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; flex-shrink:0;
+    }
+    .gb-badge-t { font-family:var(--serif); font-size:.7rem; font-style:italic; color:rgba(255,255,255,.5); line-height:1.2; }
+    .gb-badge-n { font-family:var(--serif); font-size:2rem; font-weight:300; font-style:italic; color:var(--gold); line-height:1; }
+    .gb-badge-s { font-size:.45rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-top:.25rem; }
+    .gb-text-tag { font-size:.55rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:.6rem; }
+    .gb-title { font-family:var(--serif); font-size:clamp(1.2rem,2.5vw,2rem); font-weight:300; font-style:italic; color:var(--white); line-height:1.2; margin-bottom:.8rem; }
+    .gb-desc { font-size:.82rem; font-weight:300; line-height:1.75; color:var(--muted-d); max-width:620px; }
+    .gb-link { display:inline-flex; align-items:center; gap:.5rem; margin-top:1rem; font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#93C5FD; text-decoration:none; transition:gap .25s; }
+    .gb-link:hover { gap:.9rem; }
+
+    /* Press features grid */
+    .press-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+    @media(max-width:900px){ .press-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:560px){ .press-grid { grid-template-columns:1fr; } }
+    .pf { padding:2.8rem 3.5vw; border-right:1px solid var(--border-d); border-bottom:1px solid var(--border-d); transition:background .3s; position:relative; overflow:hidden; }
+    .pf::before { content:''; position:absolute; top:0; left:0; width:0; height:2px; background:var(--gold); transition:width .5s; }
+    .pf:hover::before { width:100%; }
+    .pf:hover { background:var(--ink2); }
+    .pf:nth-child(3n) { border-right:none; }
+    @media(max-width:900px){ .pf:nth-child(3n) { border-right:1px solid var(--border-d); } .pf:nth-child(2n) { border-right:none; } }
+    @media(max-width:560px){ .pf { border-right:none; } }
+    .pf-type { font-size:.52rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:.6rem; }
+    .pf-pub { font-size:.6rem; font-weight:600; letter-spacing:.1em; color:rgba(255,255,255,.3); text-transform:uppercase; margin-bottom:.5rem; }
+    .pf-title { font-family:var(--serif); font-size:1.05rem; font-style:italic; font-weight:300; color:var(--white); line-height:1.35; margin-bottom:.8rem; }
+    .pf-desc { font-size:.78rem; font-weight:300; line-height:1.7; color:var(--muted-d); margin-bottom:1.2rem; }
+    .pf-link { font-size:.58rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#93C5FD; text-decoration:none; display:inline-flex; align-items:center; gap:.4rem; transition:gap .25s; }
+    .pf-link:hover { gap:.8rem; }
+
+    /* Media timeline strip */
+    .press-timeline { display:flex; overflow-x:auto; border-top:1px solid var(--border-d); scrollbar-width:none; }
+    .press-timeline::-webkit-scrollbar { display:none; }
+    .pt { flex:0 0 220px; padding:2.5rem 2rem; border-right:1px solid var(--border-d); }
+    .pt-yr { font-family:var(--serif); font-size:2.4rem; font-weight:300; color:var(--gold); line-height:1; margin-bottom:.5rem; }
+    .pt-label { font-size:.7rem; font-weight:300; line-height:1.6; color:var(--muted-d); }
+    .pt-label strong { color:var(--white); font-weight:500; display:block; margin-bottom:.15rem; }
+
     /* ── SPEAKING ── dark bg */
     .speaking { background:var(--ink); border-top:1px solid var(--border-d); display:grid; grid-template-columns:360px 1fr; }
     @media(max-width:960px){.speaking{grid-template-columns:1fr}}
@@ -460,7 +515,7 @@ function Nav() {
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
-  const links = ["About", "Ministries", "Videos", "Books", "Speaking", "Contact"];
+  const links = ["About", "Ministries", "Videos", "Books", "Press", "Speaking", "Contact"];
   return (<>
     <motion.header className={`nav${s ? " s" : ""}`}
       initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
@@ -837,6 +892,130 @@ function Books() {
   );
 }
 
+/* ─── PRESS & PUBLICATIONS ──────────────────────────────────────────────── */
+function Press() {
+  const features = [
+    {
+      type: "Exclusive Interview",
+      pub: "Naija Standard Newspaper",
+      title: "Untold Story of How I Pioneered The Glitterati in ThisDAY",
+      desc: "Dr. Hamilton reveals how he created Nigeria's most iconic celebrity and lifestyle column — The Glitterati — inside ThisDAY's Sunday newspaper, making it the definitive society page of a generation.",
+      link: "https://nigeriastandardnewspaper.com/a/exclusive-interview-untold-story-of-how-i-pioneered-the-glitterati-in-thisday-newspaper-dr-kunle-hamilton-nigerias-ace-celebrity-editor-president-shaddaiville-ministries-international/"
+    },
+    {
+      type: "Interview",
+      pub: "Sunday Telegraph",
+      title: "GOs Living Lavish Lifestyles Have Given Church a Bad Image",
+      desc: "Dr. Hamilton speaks candidly on prosperity gospel excess, the state of the Celestial Church, and why he chose discipleship over denomination.",
+      link: "https://jimidisu.com/gos-living-lavish-lifestyles-have-given-church-a-bad-image/"
+    },
+    {
+      type: "News Feature",
+      pub: "Sunday Punch",
+      title: "Seven Nigerians Awarded UK Leadership Fellowships",
+      desc: "Coverage of the ShaddaiVille Leadership Academy UK fellowship awards presented at CCC PraiseVille's Festival of the Word 7.0, with Dr. Hamilton cited as president of the awarding body.",
+      link: "https://punchng.com/seven-nigerians-win-uk-fellowship-awards/"
+    },
+    {
+      type: "News Report",
+      pub: "Legit.ng / Legit Nigeria",
+      title: "Kunle Hamilton Knocks BBNaija's Imisi — Sends Memo to CCC Youths",
+      desc: "His widely-shared pastoral address on the BBNaija controversy sparked a national conversation about faith, fame, and the moral responsibility of the church.",
+      link: "https://www.legit.ng/entertainment/tv-shows/1678350-kunle-hamilton-knocks-bbnaijas-imisi-osoffas-grandson-sends-memo-cele-youths-proud/"
+    },
+    {
+      type: "Event Coverage",
+      pub: "Champion Newspapers",
+      title: "10th Anniversary Thanksgiving at CCC PraiseVille, Lagos",
+      desc: "Dr. Hamilton hosted the 10th anniversary thanksgiving of Lifestyle Initiatives, with professors, professionals and faith leaders gathering at CCC PraiseVille.",
+      link: "https://championnews.com.ng/2025/10/20/10th-anniversary-thanksgiving-celebration-of-lifestyle-initiatives-held-in-ccc-praiseville-lagos/"
+    },
+    {
+      type: "Profile",
+      pub: "Hamiltonstyle.org",
+      title: "Celestial Church Gets PraiseVille: A New Parish in Berlin, Germany",
+      desc: "The story of Dr. Hamilton founding CCC PraiseVille in Berlin on May 8, 2016 — how 13 years of ShaddaiVille eventually gave birth to a Celestial Church parish on German soil.",
+      link: "http://www.hamiltonstyle.org/celestial-church-gets-new-parish-berlin-germany/"
+    },
+  ];
+
+  const timeline = [
+    { yr: "1985", role: "BA Philosophy", detail: "Best Student, University of Lagos" },
+    { yr: "1989", role: "Media Career Begins", detail: "Newspaper Editor, PR & Advertising Consultant" },
+    { yr: "1990", role: "M.Sc Mass Comm", detail: "University of Lagos" },
+    { yr: "~00s", role: "Vanguard & ThisDAY", detail: "Editor — pioneered The Glitterati column" },
+    { yr: "2007", role: "ShaddaiVille Founded", detail: "Ministries Int'l — UK Leadership Academy" },
+    { yr: "2016", role: "CCC PraiseVille", detail: "Founded in Berlin, Germany" },
+  ];
+
+  return (
+    <section className="press" id="press">
+      {/* Header */}
+      <div className="press-hd">
+        <div>
+          <R><div className="stag light">Media · Journalism · Press</div></R>
+          <ClipLine text="In the Press" className="sh2 light" delay={.1} />
+          <ClipLine text="& Published" className="sh2 light" delay={.18} italic />
+        </div>
+        <R delay={.15}>
+          <p className="press-lead">
+            Before he was a prophet, Dr. Hamilton was <strong>one of Nigeria's most respected newspaper editors</strong> — at Vanguard and ThisDAY. He pioneered <strong>The Glitterati</strong>, ThisDAY's iconic Sunday lifestyle and celebrity pull-out, that remains a benchmark for entertainment journalism in Nigeria. His words — in print, online and on-screen — continue to shape public discourse.
+          </p>
+        </R>
+      </div>
+
+      {/* Glitterati Hero Banner */}
+      <R y={0} x={0}>
+        <div className="glitterati-banner">
+          <div className="gb-badge">
+            <div className="gb-badge-t">Pioneer</div>
+            <div className="gb-badge-n">The</div>
+            <div className="gb-badge-n" style={{ fontSize:"1.1rem" }}>Glitterati</div>
+            <div className="gb-badge-s">ThisDAY · Sunday</div>
+          </div>
+          <div>
+            <div className="gb-text-tag">Signature Achievement · Nigerian Media History</div>
+            <div className="gb-title">How Dr. Hamilton Created Nigeria's Most Iconic Celebrity Column</div>
+            <p className="gb-desc">
+              The Glitterati — ThisDAY Newspaper's lifestyle and entertainment pull-out of the Sunday edition — was pioneered by Dr. Kunle Hamilton during his time as editor at the newspaper. It became the definitive page where Nigeria's glitterati converged: celebrities, society figures, politicians and cultural icons. In an exclusive interview with Naija Standard Newspaper, he tells the full untold story for the first time.
+            </p>
+            <a className="gb-link" href="https://nigeriastandardnewspaper.com/a/exclusive-interview-untold-story-of-how-i-pioneered-the-glitterati-in-thisday-newspaper-dr-kunle-hamilton-nigerias-ace-celebrity-editor-president-shaddaiville-ministries-international/" target="_blank" rel="noopener noreferrer">
+              Read the Full Interview →
+            </a>
+          </div>
+        </div>
+      </R>
+
+      {/* Press Features Grid */}
+      <div className="press-grid">
+        {features.map((f, i) => (
+          <R key={i} delay={i * .07}>
+            <div className="pf">
+              <div className="pf-type">{f.type}</div>
+              <div className="pf-pub">{f.pub}</div>
+              <div className="pf-title">{f.title}</div>
+              <p className="pf-desc">{f.desc}</p>
+              <a className="pf-link" href={f.link} target="_blank" rel="noopener noreferrer">Read Article →</a>
+            </div>
+          </R>
+        ))}
+      </div>
+
+      {/* Career Timeline */}
+      <div className="press-timeline">
+        {timeline.map((t, i) => (
+          <R key={i} delay={i * .05} x={0} y={16}>
+            <div className="pt">
+              <div className="pt-yr">{t.yr}</div>
+              <div className="pt-label"><strong>{t.role}</strong>{t.detail}</div>
+            </div>
+          </R>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ─── SPEAKING ───────────────────────────────────────────────────────────── */
 function Speaking() {
   const evs = [
@@ -1000,6 +1179,7 @@ export default function App() {
     <Ministries />
     <Videos />
     <Books />
+    <Press />
     <Speaking />
     <Contact />
     <Footer />
