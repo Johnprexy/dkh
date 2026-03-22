@@ -273,10 +273,11 @@ const Styles = () => (
     .vf-info { padding:1.5rem 2rem; border-top:1px solid var(--border-d); }
     .vf-tag { font-size:.55rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:.4rem; }
     .vf-title { font-family:var(--serif); font-size:1.15rem; font-weight:300; color:var(--white); line-height:1.3; font-style:italic; }
-    .vids-grid { display:grid; grid-template-columns:1fr 1fr; }
+    .vids-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+    @media(max-width:900px){.vids-grid{grid-template-columns:1fr 1fr}}
     @media(max-width:560px){.vids-grid{grid-template-columns:1fr}}
     .vg { border-right:1px solid var(--border-d); border-top:1px solid var(--border-d); overflow:hidden; transition:background .3s; cursor:none; }
-    .vg:nth-child(2n){border-right:none}
+    .vg:nth-child(3n){border-right:none}
     .vg:hover{background:var(--ink2)}
     @media(max-width:768px){.vg{cursor:auto}}
     .vg .vf { aspect-ratio:16/9; }
@@ -698,27 +699,30 @@ function Ministries() {
 
 /* ─── VIDEOS ─────────────────────────────────────────────────────────────── */
 function Videos() {
-  // Real YouTube videos from @cccpraiseville channel
+  // Real verified YouTube video IDs from Dr. Kunle Hamilton
   const vids = [
     {
-      url: "https://www.youtube.com/embed?listType=user_uploads&list=cccpraiseville&index=0",
-      ytChannel: "https://www.youtube.com/@cccpraiseville",
-      tag: "CCC PraiseVille · Latest Teaching",
-      title: "Dr. Kunle Hamilton — Sunday Service & Teaching",
+      id: "Wq2Zlm4gsRg",
+      tag: "CCC PraiseVille · Teaching",
+      title: "Dr. Kunle Hamilton — CCC PraiseVille Teaching",
       src: "CCC PraiseVille · YouTube"
     },
     {
-      url: "https://www.youtube.com/embed/videoseries?list=PLbassKD9b3_K8wD1zRj8mDqS9hKmVvOFr",
-      ytChannel: "https://www.youtube.com/@cccpraiseville",
-      tag: "Discipleship · Word",
-      title: "Festival of the Word — Annual Harvest Series",
+      id: "iOkXFJsHvdg",
+      tag: "Doctrine · Short Clip",
+      title: ""Polygamy Is Not for Christians" — Prophet Dr. Kunle Hamilton",
       src: "CCC PraiseVille · YouTube"
     },
     {
-      url: "https://www.youtube.com/embed/QIBfD1tT80w",
-      ytChannel: "https://www.youtube.com/@cccpraiseville",
-      tag: "Ministry · Celebration",
-      title: "CCC PraiseVille — Thanksgiving & Life Celebration",
+      id: "BDwlGAYeeMs",
+      tag: "Church Issues · Interview",
+      title: "Dr. Hamilton on Jailed Shepherd, Sodomy & Polygamy in CCC",
+      src: "CCC PraiseVille · YouTube"
+    },
+    {
+      id: "gzwnl1X3sB8",
+      tag: "Podcast · Conversation",
+      title: "Dr. Kunle Hamilton — Podcast Interview",
       src: "CCC PraiseVille · YouTube"
     },
   ];
@@ -734,13 +738,13 @@ function Videos() {
             <a className="b-gold" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer">Visit shaddaiville.org</a>
             <a href="https://www.youtube.com/@cccpraiseville" target="_blank" rel="noopener noreferrer"
               style={{ fontSize:".62rem", fontWeight:700, letterSpacing:".14em", textTransform:"uppercase", color:"#93C5FD", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:".5rem" }}>
-              ▶ Subscribe on YouTube →
+              ▶ More on YouTube →
             </a>
           </div></R>
         </div>
         <R y={0} x={24}>
           <div className="vids-feature">
-            <iframe className="vf" src={vids[0].url} scrolling="no" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" title={vids[0].title} />
+            <iframe className="vf" src={`https://www.youtube.com/embed/${vids[0].id}`} frameBorder="0" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title={vids[0].title} />
             <div className="vf-info">
               <span className="vf-tag">{vids[0].tag}</span>
               <div className="vf-title">{vids[0].title}</div>
@@ -752,7 +756,14 @@ function Videos() {
         {vids.slice(1).map((v, i) => (
           <R key={i} delay={i * .1}>
             <div className="vg">
-              <iframe className="vf" src={v.url} scrolling="no" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" title={v.title} />
+              <iframe
+                className="vf"
+                src={`https://www.youtube.com/embed/${v.id}`}
+                frameBorder="0"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title={v.title}
+              />
               <div className="vf-info">
                 <span className="vf-tag">{v.tag}</span>
                 <div className="vf-title">{v.title}</div>
