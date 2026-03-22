@@ -340,16 +340,16 @@ const Styles = () => (
     .ft-col:last-child{border-right:none}
     @media(max-width:900px){.ft-col:nth-child(2){border-right:none}.ft-col:nth-child(3){border-top:1px solid var(--border-d)}.ft-col:nth-child(4){border-right:none;border-top:1px solid var(--border-d)}}
     @media(max-width:480px){.ft-col{border-right:none!important;border-bottom:1px solid var(--border-d)}.ft-col:last-child{border-bottom:none}}
-    .ft-logo { font-family:var(--serif); font-size:1.2rem; font-style:italic; font-weight:300; color:var(--white); margin-bottom:.8rem; }
+    .ft-logo { font-family:var(--serif); font-size:1.2rem; font-style:italic; font-weight:300; color:var(--white); margin-bottom:.8rem; letter-spacing:.01em; }
     .ft-logo span{color:#93C5FD}
-    .ft-tagline { font-size:.75rem; font-weight:300; line-height:1.75; color:rgba(255,255,255,.3); margin-bottom:1.5rem; max-width:240px; }
+    .ft-tagline { font-size:.75rem; font-weight:300; line-height:1.75; color:rgba(255,255,255,.75); margin-bottom:1.5rem; max-width:240px; }
     .ft-gold { width:32px; height:1.5px; background:#60A5FA; }
-    .ft-ch { font-size:.55rem; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:rgba(255,255,255,.25); margin-bottom:1.2rem; }
-    .ftl { display:block; font-size:.78rem; font-weight:300; color:rgba(255,255,255,.32); text-decoration:none; margin-bottom:.55rem; transition:color .2s; cursor:none; }
-    .ftl:hover{color:var(--white)}
+    .ft-ch { font-size:.55rem; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:rgba(255,255,255,.9); margin-bottom:1.2rem; }
+    .ftl { display:block; font-size:.78rem; font-weight:400; color:rgba(255,255,255,.72); text-decoration:none; margin-bottom:.55rem; transition:color .2s; cursor:none; }
+    .ftl:hover{color:var(--white); padding-left:4px;}
     @media(max-width:768px){.ftl{cursor:auto}}
     .ft-bottom { padding:1.5rem 4vw; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
-    .ft-copy { font-size:.62rem; font-weight:300; color:rgba(255,255,255,.18); letter-spacing:.05em; }
+    .ft-copy { font-size:.62rem; font-weight:400; color:rgba(255,255,255,.6); letter-spacing:.05em; }
 
     /* ── MARQUEE ── gold bg strip */
     .mq-wrap { background:var(--gold); overflow:hidden; padding:.75rem 0; }
@@ -867,7 +867,7 @@ function Footer() {
         </div>
       </div>
       <div className="ft-bottom">
-        <div className="ft-copy">© 2025 Dr. Kunle Hamilton · All Rights Reserved</div>
+        <div className="ft-copy">© 2026 Dr. Kunle Hamilton · All Rights Reserved</div>
         <div className="ft-copy">PraiseVille Global · ShaddaiVille Ministries International</div>
       </div>
     </footer>
