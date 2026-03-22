@@ -51,118 +51,142 @@ const Styles = () => (
     .cr { position:fixed; width:38px; height:38px; border:1.5px solid rgba(37,99,235,.35); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); }
     @media(max-width:768px){.cd,.cr{display:none}}
 
-    /* ── NAV ── */
+    /* ── NAV — Furtick style: WHITE bar sits ABOVE the hero, no overlay ── */
     .nav {
-      position:fixed; inset:0 0 auto; z-index:200; height:70px;
+      position:fixed; inset:0 0 auto; z-index:200; height:68px;
       display:flex; align-items:center; justify-content:space-between;
-      padding:0 5vw; transition:background .5s, border-color .5s;
-      border-bottom: 1px solid transparent;
+      padding:0 4vw;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid rgba(9,21,42,0.10);
+      transition:box-shadow .3s;
     }
-    .nav.s { background:rgba(13,13,13,.93); backdrop-filter:blur(20px); border-color:var(--border-d); }
-    .logo { font-family:var(--serif); font-size:.95rem; font-weight:400; color:var(--white); text-decoration:none; cursor:none; letter-spacing:.02em; }
+    .nav.s { box-shadow:0 2px 20px rgba(9,21,42,0.08); }
+    /* Logo — dark ink on white nav */
+    .logo {
+      font-family:var(--serif); font-size:.98rem; font-weight:400;
+      color:var(--ink); text-decoration:none; cursor:none; letter-spacing:.02em;
+      white-space:nowrap;
+    }
     .logo em { font-style:italic; color:var(--gold); }
     @media(max-width:768px){.logo{cursor:auto}}
-    .nav-links { display:flex; align-items:center; gap:2.5rem; }
+    .nav-links { display:flex; align-items:center; gap:2.2rem; }
     @media(max-width:900px){.nav-links{display:none}}
-    .nl { font-size:.68rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.55); text-decoration:none; cursor:none; transition:color .2s; }
-    .nl:hover { color:var(--white); }
-    .nav-cta { font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding:.58rem 1.6rem; background:var(--gold); color:var(--white); text-decoration:none; cursor:none; transition:background .25s; }
-    .nav-cta:hover { background:var(--gold2); color:var(--white); }
+    /* Nav links — dark on white */
+    .nl {
+      font-size:.67rem; font-weight:600; letter-spacing:.14em;
+      text-transform:uppercase; color:rgba(9,21,42,.55);
+      text-decoration:none; cursor:none; transition:color .2s; position:relative;
+    }
+    .nl::after { content:''; position:absolute; bottom:-3px; left:0; width:0; height:1.5px; background:var(--gold); transition:width .3s; }
+    .nl:hover { color:var(--ink); }
+    .nl:hover::after { width:100%; }
+    /* CTA button — blue pill like Furtick's */
+    .nav-cta {
+      font-size:.67rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      padding:.6rem 1.6rem; background:var(--gold); color:var(--white);
+      text-decoration:none; cursor:none; transition:background .25s;
+      border-radius:4px;
+    }
+    .nav-cta:hover { background:var(--gold2); }
     @media(max-width:768px){.nav-cta{cursor:auto}}
+    /* Hamburger */
     .ham { display:none; background:none; border:none; cursor:pointer; flex-direction:column; gap:5px; padding:4px; }
     @media(max-width:900px){.ham{display:flex}}
-    .hl { width:22px; height:1.5px; background:var(--white); border-radius:1px; transition:transform .3s,opacity .3s; }
-    .mob { position:fixed; inset:0; background:var(--ink); z-index:195; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2.5rem; }
-    .mob a { font-family:var(--serif); font-size:2.8rem; font-weight:300; font-style:italic; color:var(--white); text-decoration:none; transition:color .2s; }
+    .hl { width:22px; height:1.5px; background:var(--ink); border-radius:1px; transition:transform .3s,opacity .3s; }
+    /* Mobile overlay */
+    .mob { position:fixed; inset:0; background:var(--white); z-index:195; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2.5rem; border-top:3px solid var(--gold); }
+    .mob a { font-family:var(--serif); font-size:2.8rem; font-weight:300; font-style:italic; color:var(--ink); text-decoration:none; transition:color .2s; }
     .mob a:hover { color:var(--gold); }
-    .mob-sep { width:40px; height:1px; background:var(--border-d); }
+    .mob-sep { width:40px; height:1px; background:rgba(9,21,42,.12); }
 
     /* ══════════════════════════════════════════════════════════════
-       HERO — Full-bleed portrait, Tony Robbins-style
-       Photo fills the ENTIRE viewport. Text lives at bottom-left.
+       HERO — Furtick style:
+       • White nav sits above (fixed, pushes content down via margin-top)
+       • Hero image = separate block below nav, NOT overlapping
+       • Text anchored at the very BOTTOM of the image
+       • Zero overlap between logo and hero text possible
        ══════════════════════════════════════════════════════════════ */
     .hero {
-      position:relative; width:100%; height:100vh; overflow:hidden;
+      position:relative; width:100%;
+      height:calc(100vh - 68px);   /* full viewport minus nav height */
+      margin-top:68px;              /* push below the fixed white nav */
+      overflow:hidden;
       background:var(--ink);
     }
+    @media(max-width:768px){ .hero { height:75vw; min-height:420px; } }
     .hero-photo {
       position:absolute; inset:0; width:100%; height:100%;
-      object-fit:cover; object-position:center 15%;
-      filter:brightness(.72) contrast(1.10) saturate(0.85);
+      object-fit:cover; object-position:center 12%;
+      filter:brightness(.80) contrast(1.08) saturate(0.88);
     }
-    /* STYLISH GRADIENT — Navy base + blue shimmer + text legibility */
+    /* STYLISH GRADIENT — rich navy layers + electric blue wash */
     .hero-overlay {
       position:absolute; inset:0;
       background:
-        /* Strong dark at bottom for text clarity */
+        /* Heavy dark bottom zone — all text lives here */
         linear-gradient(to top,
-          rgba(9,21,42,0.97) 0%,
-          rgba(9,21,42,0.80) 28%,
-          rgba(9,21,42,0.35) 52%,
+          rgba(9,21,42,0.96) 0%,
+          rgba(9,21,42,0.75) 30%,
+          rgba(9,21,42,0.25) 55%,
           transparent 72%
         ),
-        /* Left vignette — text side */
+        /* Left side vignette */
         linear-gradient(to right,
-          rgba(9,21,42,0.75) 0%,
-          rgba(9,21,42,0.30) 45%,
-          transparent 70%
+          rgba(9,21,42,0.65) 0%,
+          rgba(9,21,42,0.20) 42%,
+          transparent 65%
         ),
-        /* Top vignette — nav area */
-        linear-gradient(to bottom,
-          rgba(9,21,42,0.55) 0%,
-          transparent 35%
-        ),
-        /* Blue colour wash — gives image the electric blue tint */
-        linear-gradient(135deg,
-          rgba(15,30,70,0.45) 0%,
-          rgba(37,99,235,0.12) 50%,
-          rgba(9,21,42,0.35) 100%
+        /* Blue cinematic colour wash */
+        linear-gradient(160deg,
+          rgba(10,22,65,0.50) 0%,
+          rgba(37,99,235,0.10) 48%,
+          rgba(9,21,42,0.30) 100%
         );
     }
-    /* The text content */
+    /* Text — bottom-left, Furtick exact layout */
     .hero-body {
       position:absolute; bottom:0; left:0; right:0;
-      padding:90px 7vw 7vh;
+      padding:0 6vw 5vh;
       display:flex; flex-direction:column; align-items:flex-start;
       z-index:2;
     }
     .hero-kicker {
-      font-size:.62rem; font-weight:700; letter-spacing:.32em;
-      text-transform:uppercase; color:rgba(147,197,253,1);
-      display:flex; align-items:center; gap:.8rem; margin-bottom:1.8rem;
+      font-size:.6rem; font-weight:700; letter-spacing:.32em;
+      text-transform:uppercase; color:#93C5FD;
+      display:flex; align-items:center; gap:.8rem; margin-bottom:1.5rem;
     }
-    .hero-kicker-line { width:32px; height:1.5px; background:rgba(147,197,253,.7); flex-shrink:0; }
-    /* Giant serif name — clips upward */
+    .hero-kicker-line { width:28px; height:1.5px; background:rgba(147,197,253,.6); flex-shrink:0; }
+    /* Giant serif name */
     .hero-h1 {
       font-family:var(--serif);
-      font-size:clamp(3.8rem, 9vw, 11rem);
+      font-size:clamp(3.2rem, 8vw, 9.5rem);
       font-weight:300; line-height:.88;
       letter-spacing:-.02em; color:var(--white);
-      margin-bottom:1.6rem;
+      margin-bottom:1.4rem;
     }
     .hero-h1 em { font-style:italic; color:#93C5FD; display:block; }
-    @media(max-width:600px){.hero-h1{font-size:clamp(3rem,12vw,5rem)}}
+    @media(max-width:600px){ .hero-h1 { font-size:clamp(2.8rem,11vw,4.5rem); } }
     .hero-sub {
-      font-size:clamp(.85rem,1.4vw,.95rem); font-weight:300;
-      line-height:1.75; color:rgba(255,255,255,.6);
-      max-width:480px; margin-bottom:2.5rem;
+      font-size:clamp(.82rem,1.3vw,.92rem); font-weight:300;
+      line-height:1.75; color:rgba(255,255,255,.62);
+      max-width:500px; margin-bottom:2.2rem;
     }
-    .hero-actions { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3vh; }
-    /* Button: gold fill */
-    .b-gold { font-size:.68rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; background:var(--gold); color:var(--white); padding:.9rem 2.2rem; text-decoration:none; cursor:none; transition:background .25s; display:inline-block; }
+    .hero-actions { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2.5vh; }
+    /* Buttons */
+    .b-gold { font-size:.67rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; background:var(--gold); color:var(--white); padding:.88rem 2.2rem; text-decoration:none; cursor:none; transition:background .25s; display:inline-block; border-radius:3px; }
     .b-gold:hover { background:var(--gold2); }
-    /* Button: ghost white */
-    .b-ghost { font-size:.68rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; border:1.5px solid rgba(255,255,255,.28); color:var(--white); padding:.9rem 2.2rem; text-decoration:none; cursor:none; transition:border-color .25s,color .25s; display:inline-block; }
-    .b-ghost:hover { border-color:var(--white); }
+    .b-ghost { font-size:.67rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; border:1.5px solid rgba(255,255,255,.35); color:var(--white); padding:.88rem 2.2rem; text-decoration:none; cursor:none; transition:border-color .25s; display:inline-block; border-radius:3px; background:rgba(255,255,255,0.05); }
+    .b-ghost:hover { border-color:var(--white); background:rgba(255,255,255,0.10); }
     @media(max-width:768px){.b-gold,.b-ghost{cursor:auto}}
-    /* Scroll cue */
+    /* Scroll cue — bottom right */
     .scroll-cue {
-      position:absolute; bottom:2.5rem; right:5vw; z-index:3;
+      position:absolute; bottom:2rem; right:4vw; z-index:3;
       display:flex; flex-direction:column; align-items:center; gap:.5rem;
     }
     @media(max-width:768px){.scroll-cue{display:none}}
-    .sc-text { font-size:.5rem; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:rgba(255,255,255,.3); writing-mode:vertical-rl; }
-    .sc-line { width:1px; height:44px; background:rgba(255,255,255,.2); transform-origin:top; }
+    .sc-text { font-size:.48rem; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:rgba(255,255,255,.28); writing-mode:vertical-rl; }
+    .sc-line { width:1px; height:40px; background:rgba(255,255,255,.18); transform-origin:top; }
 
     /* ── STATS STRIP ── on dark ink background */
     .stats-strip {
@@ -428,7 +452,7 @@ function CountUp({ to, suffix = "" }) {
 function Nav() {
   const [s, setS] = useState(false), [open, setOpen] = useState(false);
   useEffect(() => {
-    const fn = () => setS(window.scrollY > 40);
+    const fn = () => setS(window.scrollY > 10);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
