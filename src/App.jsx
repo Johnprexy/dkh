@@ -1,1549 +1,1173 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useInView, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 
-// ─── GOOGLE FONTS ──────────────────────────────────────────────────────────────
-const FontLink = () => (
+// ── REAL PHOTO IMPORTS ────────────────────────────────────────────────────────
+const IMG_FORMAL   = "/dkh-formal.jpg";
+const IMG_PREACHING = "/dkh-preaching.jpg";
+const IMG_SPEAKING  = "/dkh-speaking.jpg";
+
+// ── FACEBOOK VIDEO IDs (extracted from search results) ────────────────────────
+const VIDEOS = [
+  { fbId: "1356642479037237", page: "celestial.focus",     title: "Dr. Kunle Hamilton Teaches Discipleship",      tag: "Discipleship" },
+  { fbId: "449065333576250",  page: "hephzibahtelevision", title: "Meeting with Dr. Kunle Hamilton — The Roles of Leadership", tag: "Leadership" },
+  { fbId: "1241668604555889", page: "celestial.focus",     title: "Christmas — CCC PraiseVille Highlight",       tag: "Worship" },
+];
+
+// ── STYLES ────────────────────────────────────────────────────────────────────
+const G = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=Cormorant:ital,wght@0,300;1,300&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Outfit:wght@200;300;400;500;600&display=swap');
 
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     :root {
-      --ivory:       #FAF8F3;
-      --cream:       #F2EDE3;
-      --parchment:   #E8E0D0;
-      --gold:        #B8952A;
-      --gold-light:  #D4AF54;
-      --gold-muted:  #C9A84C;
-      --obsidian:    #0D0D0D;
-      --ink:         #1A1614;
-      --slate:       #3D3530;
-      --mist:        #7A7068;
-      --white:       #FFFFFF;
-      --praiseville: #1C2B4A;
-      --shaddai:     #2A1C0D;
+      --c-bg:       #FDFCF8;
+      --c-surface:  #F7F3EB;
+      --c-border:   #E8DFC8;
+      --c-gold:     #C49A2A;
+      --c-gold2:    #E2B84A;
+      --c-gold-dim: #9A7820;
+      --c-ink:      #100E0A;
+      --c-dark:     #1A1510;
+      --c-muted:    #6B6255;
+      --c-white:    #FFFFFF;
+      --c-navy:     #14213D;
+      --c-navy2:    #1C2D52;
+      --r: 0px;
     }
 
-    html { scroll-behavior: smooth; }
-
+    html { scroll-behavior:smooth; overflow-x:hidden; }
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--ivory);
-      color: var(--ink);
-      overflow-x: hidden;
-      cursor: none;
+      font-family:'Outfit',sans-serif;
+      background:var(--c-bg);
+      color:var(--c-ink);
+      overflow-x:hidden;
+      cursor:none;
     }
+    ::-webkit-scrollbar { width:2px; }
+    ::-webkit-scrollbar-track { background:var(--c-surface); }
+    ::-webkit-scrollbar-thumb { background:var(--c-gold); }
 
-    /* Custom cursor */
-    .cursor {
-      position: fixed;
-      width: 8px; height: 8px;
-      background: var(--gold);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transition: transform 0.1s ease;
-      mix-blend-mode: multiply;
+    /* ── CURSOR ── */
+    .cur-dot {
+      position:fixed; width:6px; height:6px; border-radius:50%;
+      background:var(--c-gold); pointer-events:none; z-index:9999;
+      transform:translate(-50%,-50%);
     }
-    .cursor-ring {
-      position: fixed;
-      width: 36px; height: 36px;
-      border: 1px solid var(--gold);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9998;
-      transition: transform 0.25s ease, width 0.2s, height 0.2s;
-      mix-blend-mode: multiply;
+    .cur-circle {
+      position:fixed; width:40px; height:40px; border-radius:50%;
+      border:1px solid rgba(196,154,42,0.5); pointer-events:none; z-index:9998;
+      transform:translate(-50%,-50%); transition:width .2s,height .2s,opacity .2s;
     }
+    body:hover .cur-circle { opacity:1; }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: var(--cream); }
-    ::-webkit-scrollbar-thumb { background: var(--gold); }
-
-    /* Nav */
+    /* ── NAV ── */
     .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 1.5rem 4rem;
-      display: flex; align-items: center; justify-content: space-between;
-      transition: background 0.4s ease, backdrop-filter 0.4s;
+      position:fixed; inset:0 0 auto; z-index:200;
+      padding:0 5vw;
+      height:72px; display:flex; align-items:center; justify-content:space-between;
+      transition:background .5s,box-shadow .5s;
     }
-    .nav.scrolled {
-      background: rgba(250,248,243,0.92);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(184,149,42,0.15);
+    .nav.bg {
+      background:rgba(253,252,248,0.95);
+      backdrop-filter:blur(24px);
+      box-shadow:0 1px 0 var(--c-border);
     }
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--ink);
-      text-decoration: none;
+    .logo {
+      font-family:'Playfair Display',serif;
+      font-size:1.05rem; font-weight:700; letter-spacing:0.04em;
+      color:var(--c-ink); text-decoration:none; cursor:none;
     }
-    .nav-logo span { color: var(--gold); }
-    .nav-links { display: flex; gap: 2.5rem; align-items: center; }
-    .nav-link {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--slate);
-      text-decoration: none;
-      position: relative;
-      cursor: none;
+    .logo em { font-style:italic; color:var(--c-gold); }
+    .nav-links { display:flex; gap:2rem; align-items:center; }
+    .nl {
+      font-size:.68rem; font-weight:500; letter-spacing:.16em;
+      text-transform:uppercase; color:var(--c-muted);
+      text-decoration:none; cursor:none; transition:color .25s;
+      position:relative;
     }
-    .nav-link::after {
-      content: '';
-      position: absolute; bottom: -3px; left: 0;
-      width: 0; height: 1px;
-      background: var(--gold);
-      transition: width 0.3s ease;
+    .nl::after {
+      content:''; position:absolute; bottom:-4px; left:0;
+      width:0; height:1px; background:var(--c-gold);
+      transition:width .3s;
     }
-    .nav-link:hover::after { width: 100%; }
-    .nav-link:hover { color: var(--ink); }
-    .nav-cta {
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--white);
-      background: var(--obsidian);
-      padding: 0.65rem 1.6rem;
-      text-decoration: none;
-      cursor: none;
-      transition: background 0.3s, color 0.3s;
+    .nl:hover { color:var(--c-ink); }
+    .nl:hover::after { width:100%; }
+    .nav-btn {
+      font-size:.65rem; font-weight:600; letter-spacing:.16em;
+      text-transform:uppercase; color:var(--c-dark);
+      background:var(--c-gold); padding:.6rem 1.4rem;
+      border:none; cursor:none; text-decoration:none;
+      transition:background .3s, transform .2s;
+      display:inline-block;
     }
-    .nav-cta:hover { background: var(--gold); }
+    .nav-btn:hover { background:var(--c-ink); color:#fff; }
 
-    /* Hero */
+    /* ── HERO ── */
     .hero {
-      min-height: 100vh;
-      background: var(--ivory);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      position: relative;
-      overflow: hidden;
+      min-height:100vh; display:grid;
+      grid-template-columns:55% 45%;
+      background:var(--c-bg); position:relative; overflow:hidden;
     }
     .hero-left {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 10rem 4rem 6rem 6rem;
-      position: relative;
-      z-index: 2;
+      display:flex; flex-direction:column; justify-content:center;
+      padding:9rem 5vw 6rem 6vw; position:relative; z-index:2;
     }
-    .hero-eyebrow {
-      font-size: 0.68rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2.5rem;
+    .hero-tag {
+      display:inline-flex; align-items:center; gap:.75rem;
+      font-size:.6rem; font-weight:600; letter-spacing:.3em;
+      text-transform:uppercase; color:var(--c-gold);
+      margin-bottom:2.5rem;
     }
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 40px; height: 1px;
-      background: var(--gold);
+    .hero-tag-line { width:32px; height:1px; background:var(--c-gold); }
+    .hero-h1 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(3.5rem,6.5vw,7rem);
+      font-weight:900; line-height:.92;
+      letter-spacing:-.03em; color:var(--c-ink);
     }
-    .hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(4rem, 7vw, 7.5rem);
-      font-weight: 300;
-      line-height: 0.95;
-      color: var(--ink);
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
+    .hero-h1 .gold { color:var(--c-gold); font-style:italic; }
+    .hero-h1 .light { font-weight:400; font-style:italic; display:block; }
+    .hero-rule {
+      width:60px; height:2px; background:var(--c-gold);
+      margin:2.5rem 0; transform-origin:left;
     }
-    .hero-title em {
-      font-style: italic;
-      color: var(--gold);
+    .hero-p {
+      font-size:1rem; font-weight:300; line-height:1.8;
+      color:var(--c-muted); max-width:460px; margin-bottom:3rem;
     }
-    .hero-title .dr {
-      font-size: 0.45em;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-style: normal;
-      font-weight: 500;
-      display: block;
-      color: var(--mist);
-      margin-bottom: 0.5rem;
+    .hero-actions { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+    .btn-solid {
+      font-size:.65rem; font-weight:600; letter-spacing:.18em;
+      text-transform:uppercase; background:var(--c-ink); color:#fff;
+      padding:.9rem 2.2rem; text-decoration:none; cursor:none;
+      transition:background .3s; display:inline-block;
     }
-    .hero-subtitle {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1rem, 1.6vw, 1.4rem);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--mist);
-      margin: 2rem 0 3rem;
-      line-height: 1.6;
-      max-width: 480px;
+    .btn-solid:hover { background:var(--c-gold); color:var(--c-ink); }
+    .btn-line {
+      font-size:.65rem; font-weight:500; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--c-ink);
+      text-decoration:none; cursor:none;
+      border-bottom:1px solid var(--c-gold);
+      padding-bottom:2px; transition:color .3s;
     }
-    .hero-actions { display: flex; gap: 1.2rem; align-items: center; }
-    .btn-primary {
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--white);
-      background: var(--obsidian);
-      padding: 1rem 2.5rem;
-      text-decoration: none;
-      cursor: none;
-      transition: background 0.3s;
-      display: inline-block;
-    }
-    .btn-primary:hover { background: var(--gold); }
-    .btn-ghost {
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--ink);
-      text-decoration: none;
-      display: flex; align-items: center; gap: 0.6rem;
-      cursor: none;
-    }
-    .btn-ghost::after {
-      content: '→';
-      transition: transform 0.3s;
-    }
-    .btn-ghost:hover::after { transform: translateX(5px); }
+    .btn-line:hover { color:var(--c-gold); }
 
+    /* Hero image panel */
     .hero-right {
-      position: relative;
-      overflow: hidden;
-      background: var(--cream);
+      position:relative; overflow:hidden;
+      background:var(--c-surface);
     }
-    .hero-image-placeholder {
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 50%, var(--cream) 100%);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
+    .hero-img {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; object-position:top center;
+      filter:grayscale(15%) contrast(1.05);
     }
-    .hero-monogram {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22rem;
-      font-weight: 300;
-      color: rgba(184,149,42,0.08);
-      line-height: 1;
-      user-select: none;
-      position: absolute;
+    .hero-img-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to right, var(--c-bg) 0%, transparent 30%),
+                 linear-gradient(to top, rgba(10,8,5,.6) 0%, transparent 50%);
     }
-    .hero-cross {
-      width: 2px; height: 180px;
-      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+    .hero-caption {
+      position:absolute; bottom:2.5rem; left:2rem; right:2rem;
+      font-size:.62rem; font-weight:500; letter-spacing:.25em;
+      text-transform:uppercase; color:rgba(255,255,255,.5);
     }
-    .hero-cross::after {
-      content: '';
-      position: absolute;
-      height: 2px; width: 80px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .hero-ornament {
-      position: absolute;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      writing-mode: vertical-rl;
-      right: 2rem; top: 50%; transform: translateY(-50%);
+    .hero-number {
+      position:absolute; top:50%; right:2rem;
+      transform:translateY(-50%) rotate(90deg);
+      font-family:'Playfair Display',serif;
+      font-size:.6rem; letter-spacing:.3em;
+      text-transform:uppercase; color:rgba(255,255,255,.2);
+      white-space:nowrap;
     }
 
-    /* Gold line divider */
-    .gold-line {
-      width: 60px; height: 1px;
-      background: var(--gold);
-      margin: 0 auto 1.5rem;
+    /* Scroll indicator */
+    .scroll-cue {
+      position:absolute; bottom:2rem; left:6vw;
+      display:flex; flex-direction:column; align-items:center; gap:.6rem;
+      cursor:none;
+    }
+    .scroll-cue-text {
+      font-size:.55rem; letter-spacing:.3em; text-transform:uppercase;
+      color:var(--c-muted); writing-mode:vertical-rl;
+    }
+    .scroll-cue-line {
+      width:1px; height:50px; background:var(--c-gold); transform-origin:top;
     }
 
-    /* Section base */
-    section { position: relative; }
+    /* ── MARQUEE strip ── */
+    .marquee-wrap {
+      background:var(--c-gold); overflow:hidden;
+      padding:.85rem 0; display:flex;
+    }
+    .marquee-track {
+      display:flex; gap:0; white-space:nowrap;
+      animation:marquee 28s linear infinite;
+    }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-item {
+      font-size:.62rem; font-weight:600; letter-spacing:.25em;
+      text-transform:uppercase; color:var(--c-dark);
+      padding:0 2.5rem; display:flex; align-items:center; gap:2.5rem;
+    }
+    .marquee-dot { width:4px; height:4px; border-radius:50%; background:var(--c-dark); opacity:.4; }
 
-    /* Credentials strip */
-    .credentials {
-      background: var(--obsidian);
-      padding: 2rem 6rem;
-      display: flex;
-      gap: 0; align-items: stretch;
-      overflow: hidden;
-    }
-    .credential-item {
-      flex: 1;
-      text-align: center;
-      padding: 1.5rem 2rem;
-      border-right: 1px solid rgba(184,149,42,0.2);
-    }
-    .credential-item:last-child { border-right: none; }
-    .credential-number {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3rem;
-      font-weight: 300;
-      color: var(--gold-light);
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-    .credential-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-    }
-
-    /* About */
+    /* ── ABOUT ── */
     .about {
-      padding: 10rem 6rem;
-      display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 8rem;
-      align-items: center;
-      background: var(--ivory);
+      padding:9rem 6vw; display:grid;
+      grid-template-columns:1fr 1fr; gap:6rem; align-items:center;
+      background:var(--c-bg);
     }
-    .section-label {
-      font-size: 0.62rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: var(--gold);
-      font-weight: 500;
-      display: flex; align-items: center; gap: 1rem;
-      margin-bottom: 2rem;
+    .sec-eyebrow {
+      font-size:.6rem; font-weight:600; letter-spacing:.3em;
+      text-transform:uppercase; color:var(--c-gold);
+      display:flex; align-items:center; gap:.8rem; margin-bottom:1.8rem;
     }
-    .section-label::before {
-      content: '';
-      width: 30px; height: 1px;
-      background: var(--gold);
+    .sec-eyebrow::before { content:''; width:24px; height:1px; background:var(--c-gold); }
+    .sec-h2 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.4rem,4vw,4.5rem); font-weight:700;
+      line-height:1.05; letter-spacing:-.02em; color:var(--c-ink);
+      margin-bottom:2rem;
     }
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.8rem, 4.5vw, 5rem);
-      font-weight: 300;
-      line-height: 1.05;
-      color: var(--ink);
-      letter-spacing: -0.01em;
+    .sec-h2 em { font-style:italic; color:var(--c-gold); }
+    .about-body p {
+      font-size:.95rem; font-weight:300; line-height:1.9;
+      color:var(--c-muted); margin-bottom:1.4rem;
     }
-    .section-title em { font-style: italic; color: var(--gold); }
-    .about-visual {
-      position: relative;
-      height: 600px;
+    .about-pills {
+      display:flex; flex-wrap:wrap; gap:.6rem; margin:2rem 0;
     }
-    .about-card {
-      position: absolute;
-      background: var(--obsidian);
-      padding: 2.5rem;
-      bottom: 0; right: -2rem;
-      width: 280px;
+    .pill {
+      font-size:.6rem; font-weight:500; letter-spacing:.12em;
+      text-transform:uppercase; padding:.45rem 1rem;
+      border:1px solid var(--c-border); color:var(--c-muted);
+      background:transparent; transition:all .25s;
     }
-    .about-card-quote {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-style: italic;
-      font-weight: 300;
-      color: var(--white);
-      line-height: 1.5;
-      margin-bottom: 1.2rem;
+    .pill:hover { border-color:var(--c-gold); color:var(--c-gold); }
+
+    /* Photo mosaic */
+    .mosaic {
+      display:grid;
+      grid-template-rows:280px 200px;
+      grid-template-columns:1fr 1fr;
+      gap:12px; position:relative;
     }
-    .about-card-attr {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold);
+    .mosaic-a {
+      grid-row:1/3; overflow:hidden; position:relative;
     }
-    .about-frame {
-      position: absolute;
-      top: 0; left: 0;
-      width: calc(100% - 4rem);
-      height: calc(100% - 4rem);
-      background: var(--cream);
-      border: 1px solid var(--parchment);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
+    .mosaic-b, .mosaic-c { overflow:hidden; position:relative; }
+    .mosaic img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:top center;
+      filter:grayscale(10%) contrast(1.05);
+      transition:transform .6s ease;
     }
-    .frame-monogram {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 14rem;
-      font-weight: 300;
-      color: rgba(184,149,42,0.07);
-      position: absolute;
+    .mosaic-a:hover img,
+    .mosaic-b:hover img,
+    .mosaic-c:hover img { transform:scale(1.04); }
+    .mosaic-label {
+      position:absolute; bottom:.8rem; left:.8rem;
+      font-size:.55rem; font-weight:500; letter-spacing:.2em;
+      text-transform:uppercase; color:rgba(255,255,255,.7);
+      background:rgba(0,0,0,.35); padding:.3rem .7rem;
+      backdrop-filter:blur(4px);
     }
-    .frame-cross-v {
-      width: 1px; height: 120px;
-      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    .mosaic-gold-bar {
+      position:absolute; bottom:0; left:0; width:0; height:2px;
+      background:var(--c-gold); transition:width .5s;
     }
-    .about-body {
-      padding-top: 1rem;
+    .mosaic-a:hover .mosaic-gold-bar,
+    .mosaic-b:hover .mosaic-gold-bar,
+    .mosaic-c:hover .mosaic-gold-bar { width:100%; }
+    /* floating quote card */
+    .mosaic-quote {
+      position:absolute; bottom:-1.5rem; right:-1.5rem;
+      background:var(--c-ink); color:#fff; padding:1.8rem;
+      width:220px; z-index:10;
     }
-    .about-text {
-      font-size: 1.05rem;
-      line-height: 1.85;
-      color: var(--slate);
-      font-weight: 300;
-      margin-bottom: 1.5rem;
+    .mosaic-quote-text {
+      font-family:'Playfair Display',serif;
+      font-size:1rem; font-style:italic; font-weight:400;
+      line-height:1.5; margin-bottom:1rem; color:rgba(255,255,255,.9);
     }
-    .about-roles {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      margin: 2.5rem 0;
-      border-left: 2px solid var(--gold);
-      padding-left: 1.5rem;
-    }
-    .about-role {
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      color: var(--slate);
-      font-weight: 400;
-    }
-    .about-role strong {
-      color: var(--ink);
-      display: block;
-      font-size: 0.95rem;
-      margin-bottom: 0.1rem;
+    .mosaic-quote-by {
+      font-size:.55rem; font-weight:600; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--c-gold);
     }
 
-    /* Books */
-    .books {
-      background: var(--obsidian);
-      padding: 10rem 6rem;
+    /* ── STATS BAND ── */
+    .stats {
+      background:var(--c-dark); padding:5rem 6vw;
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:0; border-top:2px solid var(--c-gold);
     }
-    .books-header { text-align: center; margin-bottom: 5rem; }
-    .books-header .section-label { justify-content: center; }
-    .books-header .section-label::before { display: none; }
-    .books-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 5vw, 5.5rem);
-      font-weight: 300;
-      color: var(--white);
-      line-height: 1;
+    .stat-item {
+      text-align:center; padding:2rem;
+      border-right:1px solid rgba(255,255,255,.06);
     }
-    .books-title em { font-style: italic; color: var(--gold-light); }
-    .books-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
+    .stat-item:last-child { border-right:none; }
+    .stat-num {
+      font-family:'Playfair Display',serif;
+      font-size:3.5rem; font-weight:700; color:var(--c-gold2);
+      line-height:1; margin-bottom:.5rem;
     }
-    .book-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(184,149,42,0.1);
-      padding: 3rem 2.5rem;
-      transition: background 0.4s, border-color 0.4s;
-      cursor: none;
+    .stat-label {
+      font-size:.6rem; font-weight:500; letter-spacing:.2em;
+      text-transform:uppercase; color:rgba(255,255,255,.3);
     }
-    .book-card:hover {
-      background: rgba(184,149,42,0.05);
-      border-color: rgba(184,149,42,0.3);
-    }
-    .book-icon {
-      width: 48px; height: 60px;
-      border: 1px solid rgba(184,149,42,0.3);
-      margin-bottom: 2rem;
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    .book-icon::before {
-      content: '';
-      position: absolute;
-      left: 6px; top: 0; bottom: 0;
-      width: 3px;
-      background: linear-gradient(to bottom, var(--gold), rgba(184,149,42,0.3));
-    }
-    .book-icon-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem;
-      color: var(--gold-light);
-      margin-left: 6px;
-    }
-    .book-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem;
-      font-weight: 400;
-      color: var(--white);
-      line-height: 1.2;
-      margin-bottom: 1rem;
-    }
-    .book-desc {
-      font-size: 0.82rem;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.45);
-      font-weight: 300;
-      margin-bottom: 2rem;
-    }
-    .book-link {
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--gold-light);
-      text-decoration: none;
-      display: flex; align-items: center; gap: 0.6rem;
-      cursor: none;
-    }
-    .book-link:hover { color: var(--white); }
 
-    /* Ministries */
+    /* ── MINISTRIES ── */
     .ministries {
-      padding: 10rem 0;
-      background: var(--ivory);
+      display:grid; grid-template-columns:1fr 1fr; min-height:85vh;
     }
-    .ministries-header {
-      text-align: center;
-      padding: 0 6rem;
-      margin-bottom: 6rem;
+    .min-panel {
+      padding:8rem 5vw; display:flex; flex-direction:column;
+      justify-content:flex-end; position:relative; overflow:hidden;
     }
-    .ministries-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .min-panel-pv { background:var(--c-navy); }
+    .min-panel-sh { background:#1A1008; }
+    .min-bg-word {
+      position:absolute; top:3rem; right:2rem;
+      font-family:'Playfair Display',serif;
+      font-size:11rem; font-weight:900;
+      color:rgba(255,255,255,.025); line-height:1;
+      pointer-events:none; user-select:none;
     }
-    .ministry-panel {
-      padding: 6rem;
-      position: relative;
-      overflow: hidden;
-      min-height: 70vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
+    .min-tag {
+      font-size:.58rem; font-weight:600; letter-spacing:.3em;
+      text-transform:uppercase; color:var(--c-gold);
+      display:flex; align-items:center; gap:.7rem; margin-bottom:1.5rem;
     }
-    .ministry-panel.praiseville {
-      background: var(--praiseville);
+    .min-tag::before { content:''; width:20px; height:1px; background:var(--c-gold); }
+    .min-h3 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2rem,3.5vw,3.5rem);
+      font-weight:700; color:#fff; line-height:1.1; margin-bottom:1.2rem;
     }
-    .ministry-panel.shaddai {
-      background: var(--shaddai);
+    .min-h3 em { font-style:italic; color:var(--c-gold2); }
+    .min-p {
+      font-size:.88rem; font-weight:300; line-height:1.85;
+      color:rgba(255,255,255,.45); max-width:400px; margin-bottom:2rem;
     }
-    .ministry-bg-text {
-      position: absolute;
-      top: 2rem; left: 3rem;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 12rem;
-      font-weight: 300;
-      color: rgba(255,255,255,0.03);
-      line-height: 1;
-      user-select: none;
-      pointer-events: none;
+    .min-facts {
+      display:flex; gap:2.5rem; margin-bottom:2.5rem;
     }
-    .ministry-eyebrow {
-      font-size: 0.6rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      color: var(--gold-light);
-      margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.8rem;
+    .mf-num {
+      font-family:'Playfair Display',serif;
+      font-size:2.2rem; font-weight:700; color:var(--c-gold2); line-height:1;
     }
-    .ministry-eyebrow::before {
-      content: '';
-      width: 24px; height: 1px;
-      background: var(--gold-light);
+    .mf-lbl {
+      font-size:.55rem; font-weight:500; letter-spacing:.18em;
+      text-transform:uppercase; color:rgba(255,255,255,.3); margin-top:.3rem;
     }
-    .ministry-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.5rem, 4vw, 4rem);
-      font-weight: 300;
-      color: var(--white);
-      line-height: 1.1;
-      margin-bottom: 1.5rem;
+    .min-btn {
+      font-size:.62rem; font-weight:600; letter-spacing:.18em;
+      text-transform:uppercase; color:#fff;
+      border:1px solid rgba(255,255,255,.18); padding:.8rem 1.8rem;
+      text-decoration:none; cursor:none; transition:all .3s;
+      display:inline-block; align-self:flex-start;
     }
-    .ministry-name em { font-style: italic; color: var(--gold-light); }
-    .ministry-desc {
-      font-size: 0.85rem;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.5);
-      font-weight: 300;
-      max-width: 420px;
-      margin-bottom: 2.5rem;
+    .min-btn:hover { border-color:var(--c-gold); background:rgba(196,154,42,.1); }
+
+    /* ── VIDEOS ── */
+    .videos { padding:9rem 6vw; background:var(--c-surface); }
+    .videos-header { margin-bottom:4rem; }
+    .videos-grid {
+      display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:1.5rem;
     }
-    .ministry-facts {
-      display: flex; gap: 2rem;
-      margin-bottom: 2.5rem;
+    .vid-card {
+      overflow:hidden; background:var(--c-bg);
+      border:1px solid var(--c-border);
+      transition:border-color .3s, transform .3s, box-shadow .3s;
+      cursor:none;
     }
-    .ministry-fact-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.5rem;
-      font-weight: 300;
-      color: var(--gold-light);
-      line-height: 1;
+    .vid-card:hover {
+      border-color:var(--c-gold);
+      transform:translateY(-6px);
+      box-shadow:0 20px 60px rgba(196,154,42,.1);
     }
-    .ministry-fact-label {
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-      margin-top: 0.3rem;
+    .vid-embed {
+      width:100%; aspect-ratio:16/9; border:0;
     }
-    .ministry-btn {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--white);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      cursor: none;
-      transition: border-color 0.3s, background 0.3s;
-      align-self: flex-start;
+    .vid-info { padding:1.4rem 1.6rem; }
+    .vid-tag {
+      font-size:.55rem; font-weight:600; letter-spacing:.22em;
+      text-transform:uppercase; color:var(--c-gold);
+      margin-bottom:.6rem; display:block;
     }
-    .ministry-btn:hover {
-      border-color: var(--gold-light);
-      background: rgba(184,149,42,0.1);
+    .vid-title {
+      font-family:'Playfair Display',serif;
+      font-size:1.05rem; font-weight:500; line-height:1.35;
+      color:var(--c-ink); margin-bottom:.5rem;
+    }
+    .vid-source {
+      font-size:.7rem; color:var(--c-muted); font-weight:300;
     }
 
-    /* Speaking */
-    .speaking {
-      background: var(--cream);
-      padding: 10rem 6rem;
+    /* Also add YouTube-style play cards for videos without direct embeds */
+    .vid-thumb {
+      width:100%; aspect-ratio:16/9;
+      background:var(--c-ink); display:flex;
+      align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
     }
-    .speaking-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 8rem;
-      align-items: start;
+    .vid-thumb-bg {
+      position:absolute; inset:0;
+      background:linear-gradient(135deg,#1a1510 0%,#2a2018 100%);
     }
-    .events-list { display: flex; flex-direction: column; }
-    .event-item {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 2rem;
-      padding: 2rem 0;
-      border-bottom: 1px solid var(--parchment);
-      transition: border-color 0.3s;
+    .vid-thumb-pattern {
+      position:absolute; inset:0; opacity:.04;
+      background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);
+      background-size:10px 10px;
     }
-    .event-item:hover { border-color: var(--gold); }
-    .event-date {
-      text-align: center;
-      padding-top: 0.3rem;
+    .play-btn {
+      width:60px; height:60px; border-radius:50%;
+      background:rgba(196,154,42,.15); border:2px solid var(--c-gold);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; z-index:1; transition:background .3s, transform .3s;
     }
-    .event-day {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.8rem;
-      font-weight: 300;
-      color: var(--gold);
-      line-height: 1;
+    .vid-card:hover .play-btn { background:var(--c-gold); transform:scale(1.1); }
+    .play-arrow {
+      width:0; height:0; margin-left:4px;
+      border-top:10px solid transparent;
+      border-bottom:10px solid transparent;
+      border-left:16px solid var(--c-gold);
+      transition:border-left-color .3s;
     }
-    .event-month {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--mist);
-    }
-    .event-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 400;
-      color: var(--ink);
-      margin-bottom: 0.4rem;
-      line-height: 1.2;
-    }
-    .event-meta {
-      font-size: 0.75rem;
-      color: var(--mist);
-      display: flex; gap: 1rem;
-    }
-    .speaking-quote {
-      position: sticky;
-      top: 8rem;
-    }
-    .big-quote {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 5rem;
-      color: var(--gold);
-      line-height: 1;
-      margin-bottom: -1rem;
-      opacity: 0.4;
-    }
-    .quote-text {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--ink);
-      line-height: 1.5;
-      margin-bottom: 2rem;
+    .vid-card:hover .play-arrow { border-left-color:var(--c-ink); }
+    .vid-fb-label {
+      position:absolute; bottom:.8rem; right:.8rem;
+      font-size:.55rem; font-weight:600; letter-spacing:.15em;
+      text-transform:uppercase; color:rgba(255,255,255,.4);
+      background:rgba(0,0,0,.3); padding:.3rem .6rem;
+      backdrop-filter:blur(4px);
     }
 
-    /* Media */
-    .media-section {
-      background: var(--ivory);
-      padding: 10rem 6rem;
+    /* ── BOOKS ── */
+    .books { padding:9rem 6vw; background:var(--c-bg); }
+    .books-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:2px; margin-top:4rem;
+      border:2px solid var(--c-border);
     }
-    .media-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2rem;
-      margin-top: 4rem;
+    .bk-card {
+      padding:3rem 2.5rem; background:var(--c-bg);
+      border-right:2px solid var(--c-border);
+      transition:background .3s; cursor:none; position:relative;
+      overflow:hidden;
     }
-    .media-card {
-      border: 1px solid var(--parchment);
-      overflow: hidden;
-      transition: border-color 0.3s, transform 0.3s;
-      cursor: none;
-      background: var(--white);
+    .bk-card:last-child { border-right:none; }
+    .bk-card:hover { background:var(--c-surface); }
+    .bk-card::before {
+      content:''; position:absolute; top:0; left:0;
+      width:0; height:3px; background:var(--c-gold);
+      transition:width .5s;
     }
-    .media-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-4px);
+    .bk-card:hover::before { width:100%; }
+    .bk-num {
+      font-family:'Playfair Display',serif;
+      font-size:4.5rem; font-weight:900; line-height:1;
+      color:var(--c-border); margin-bottom:1.5rem;
+      transition:color .3s;
     }
-    .media-thumb {
-      height: 200px;
-      background: var(--cream);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      overflow: hidden;
+    .bk-card:hover .bk-num { color:var(--c-gold); opacity:.3; }
+    .bk-tag {
+      font-size:.55rem; font-weight:600; letter-spacing:.25em;
+      text-transform:uppercase; color:var(--c-gold); margin-bottom:.8rem;
     }
-    .media-thumb-bg {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, var(--cream), var(--parchment));
+    .bk-title {
+      font-family:'Playfair Display',serif;
+      font-size:1.4rem; font-weight:600; line-height:1.25;
+      color:var(--c-ink); margin-bottom:1rem;
     }
-    .play-icon {
-      width: 56px; height: 56px;
-      border: 1px solid var(--gold);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      position: relative; z-index: 1;
-      transition: background 0.3s;
+    .bk-desc {
+      font-size:.82rem; font-weight:300; line-height:1.75;
+      color:var(--c-muted); margin-bottom:1.5rem;
     }
-    .media-card:hover .play-icon { background: var(--gold); }
-    .play-icon::after {
-      content: '▶';
-      font-size: 0.8rem;
-      color: var(--gold);
-      margin-left: 3px;
+    .bk-link {
+      font-size:.6rem; font-weight:600; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--c-ink);
+      text-decoration:none; display:inline-flex; align-items:center; gap:.5rem;
+      cursor:none; transition:color .3s;
     }
-    .media-card:hover .play-icon::after { color: var(--white); }
-    .media-tag {
-      position: absolute;
-      top: 1rem; left: 1rem;
-      font-size: 0.55rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--white);
-      background: var(--obsidian);
-      padding: 0.3rem 0.7rem;
-      z-index: 1;
-    }
-    .media-info { padding: 1.5rem; }
-    .media-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.15rem;
-      font-weight: 400;
-      color: var(--ink);
-      line-height: 1.3;
-      margin-bottom: 0.5rem;
-    }
-    .media-meta {
-      font-size: 0.7rem;
-      color: var(--mist);
-      letter-spacing: 0.05em;
-    }
+    .bk-link:hover { color:var(--c-gold); }
 
-    /* Contact */
+    /* ── SPEAKING ── */
+    .speaking { padding:9rem 6vw; background:var(--c-dark); }
+    .speaking-inner { display:grid; grid-template-columns:1fr 1.4fr; gap:8rem; align-items:start; }
+    .speaking-aside { position:sticky; top:9rem; }
+    .speaking-aside .sec-eyebrow { color:var(--c-gold); }
+    .speaking-aside .sec-h2 { color:#fff; }
+    .aside-quote {
+      margin-top:3rem; border-left:2px solid var(--c-gold);
+      padding-left:1.5rem;
+    }
+    .aside-quote-text {
+      font-family:'Playfair Display',serif;
+      font-size:1.15rem; font-style:italic; font-weight:400;
+      color:rgba(255,255,255,.7); line-height:1.6; margin-bottom:1rem;
+    }
+    .aside-quote-by {
+      font-size:.58rem; font-weight:600; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--c-gold);
+    }
+    .ev-list { display:flex; flex-direction:column; }
+    .ev-item {
+      display:grid; grid-template-columns:72px 1fr;
+      gap:1.8rem; padding:1.8rem 0;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      transition:border-color .3s;
+    }
+    .ev-item:hover { border-color:var(--c-gold); }
+    .ev-date { text-align:center; padding-top:.25rem; }
+    .ev-day {
+      font-family:'Playfair Display',serif;
+      font-size:2.8rem; font-weight:700; color:var(--c-gold2); line-height:1;
+    }
+    .ev-mon {
+      font-size:.55rem; font-weight:600; letter-spacing:.2em;
+      text-transform:uppercase; color:rgba(255,255,255,.25);
+    }
+    .ev-name {
+      font-family:'Playfair Display',serif;
+      font-size:1.15rem; font-weight:500; color:#fff;
+      margin-bottom:.4rem; line-height:1.25;
+    }
+    .ev-meta {
+      font-size:.72rem; color:rgba(255,255,255,.35);
+      display:flex; gap:.8rem; flex-wrap:wrap;
+    }
+    .ev-type { color:var(--c-gold); }
+
+    /* ── CONTACT ── */
     .contact {
-      background: var(--obsidian);
-      padding: 10rem 6rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8rem;
-      align-items: center;
+      padding:9rem 6vw; background:var(--c-bg);
+      display:grid; grid-template-columns:1fr 1.2fr; gap:8rem; align-items:start;
     }
-    .contact-left .section-title { color: var(--white); }
-    .contact-left .section-title em { color: var(--gold-light); }
-    .contact-desc {
-      font-size: 0.9rem;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.45);
-      font-weight: 300;
-      margin: 2rem 0 3rem;
+    .contact-hero-img {
+      width:100%; aspect-ratio:3/4; object-fit:cover;
+      object-position:top; filter:grayscale(20%) contrast(1.05);
     }
-    .contact-detail {
-      display: flex; gap: 1.2rem;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
+    .contact-right { padding-top:1rem; }
+    .c-detail { display:flex; gap:1rem; align-items:flex-start; margin-bottom:1.5rem; }
+    .c-icon {
+      width:34px; height:34px; flex-shrink:0;
+      border:1px solid var(--c-border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.7rem; color:var(--c-gold);
     }
-    .contact-icon {
-      width: 36px; height: 36px;
-      border: 1px solid rgba(184,149,42,0.3);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem;
-      color: var(--gold-light);
-      flex-shrink: 0;
+    .c-lbl {
+      font-size:.55rem; font-weight:600; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--c-muted); margin-bottom:.2rem;
     }
-    .contact-detail-label {
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      margin-bottom: 0.2rem;
+    .c-val { font-size:.85rem; color:var(--c-ink); font-weight:300; }
+    .cform { display:flex; flex-direction:column; gap:1rem; margin-top:2.5rem; }
+    .crow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .cfg { display:flex; flex-direction:column; gap:.4rem; }
+    .cfl {
+      font-size:.55rem; font-weight:600; letter-spacing:.18em;
+      text-transform:uppercase; color:var(--c-muted);
     }
-    .contact-detail-value {
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.7);
+    .cfi, .cfs, .cfta {
+      background:var(--c-surface); border:1px solid var(--c-border);
+      padding:.85rem 1rem; font-family:'Outfit',sans-serif;
+      font-size:.85rem; font-weight:300; color:var(--c-ink);
+      outline:none; width:100%; transition:border-color .3s;
     }
-    .contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-    .form-label {
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
+    .cfi:focus, .cfs:focus, .cfta:focus { border-color:var(--c-gold); }
+    .cfta { min-height:110px; resize:vertical; }
+    .cfbtn {
+      font-size:.65rem; font-weight:600; letter-spacing:.2em;
+      text-transform:uppercase; background:var(--c-ink); color:#fff;
+      padding:1rem 2.4rem; border:none; cursor:none;
+      font-family:'Outfit',sans-serif; transition:background .3s;
+      align-self:flex-start;
     }
-    .form-input, .form-select, .form-textarea {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 0.9rem 1rem;
-      color: var(--white);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 300;
-      outline: none;
-      transition: border-color 0.3s;
-      width: 100%;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      border-color: var(--gold-muted);
-    }
-    .form-select option { background: var(--obsidian); }
-    .form-textarea { resize: vertical; min-height: 120px; }
-    .form-submit {
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--obsidian);
-      background: var(--gold-light);
-      padding: 1.1rem 2.5rem;
-      border: none;
-      cursor: none;
-      transition: background 0.3s;
-      align-self: flex-start;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .form-submit:hover { background: var(--white); }
+    .cfbtn:hover { background:var(--c-gold); color:var(--c-ink); }
 
-    /* Footer */
-    .footer {
-      background: #080808;
-      padding: 5rem 6rem 3rem;
+    /* ── FOOTER ── */
+    .footer { background:var(--c-ink); padding:5rem 6vw 2.5rem; }
+    .ft-top {
+      display:grid; grid-template-columns:2fr 1fr 1fr 1fr;
+      gap:4rem; padding-bottom:4rem;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      margin-bottom:2.5rem;
     }
-    .footer-top {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 4rem;
-      padding-bottom: 4rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 3rem;
+    .ft-brand {
+      font-family:'Playfair Display',serif;
+      font-size:1.25rem; font-weight:700; color:#fff; margin-bottom:1rem;
     }
-    .footer-brand {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem;
-      font-weight: 400;
-      color: var(--white);
-      letter-spacing: 0.05em;
-      margin-bottom: 1rem;
+    .ft-brand em { font-style:italic; color:var(--c-gold); }
+    .ft-tagline {
+      font-size:.78rem; font-weight:300; line-height:1.7;
+      color:rgba(255,255,255,.3); margin-bottom:1.8rem;
     }
-    .footer-brand span { color: var(--gold-light); }
-    .footer-tagline {
-      font-size: 0.78rem;
-      line-height: 1.7;
-      color: rgba(255,255,255,0.3);
-      font-weight: 300;
-      margin-bottom: 2rem;
+    .ft-col-h {
+      font-size:.55rem; font-weight:600; letter-spacing:.28em;
+      text-transform:uppercase; color:var(--c-gold); margin-bottom:1.4rem;
     }
-    .footer-col-title {
-      font-size: 0.58rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--gold-light);
-      margin-bottom: 1.5rem;
+    .ftl {
+      display:block; font-size:.78rem; font-weight:300;
+      color:rgba(255,255,255,.3); text-decoration:none;
+      margin-bottom:.7rem; transition:color .25s; cursor:none;
     }
-    .footer-link {
-      display: block;
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.35);
-      text-decoration: none;
-      margin-bottom: 0.8rem;
-      transition: color 0.3s;
-      cursor: none;
+    .ftl:hover { color:#fff; }
+    .ft-bottom {
+      display:flex; justify-content:space-between; align-items:center;
     }
-    .footer-link:hover { color: var(--white); }
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .ft-copy {
+      font-size:.65rem; color:rgba(255,255,255,.18); letter-spacing:.05em;
     }
-    .footer-copy {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.2);
-      letter-spacing: 0.05em;
-    }
-    .footer-gold-line {
-      width: 40px; height: 1px;
-      background: var(--gold-light);
-      opacity: 0.4;
-    }
+    .ft-gold-sep { width:30px; height:1px; background:var(--c-gold); opacity:.3; }
 
-    /* Scroll reveal utility */
-    .reveal { opacity: 0; transform: translateY(30px); }
-
-    /* Noise overlay */
-    .noise {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 1000;
-      opacity: 0.025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-
-    @media (max-width: 1024px) {
-      .hero { grid-template-columns: 1fr; }
-      .hero-right { display: none; }
-      .hero-left { padding: 8rem 3rem 5rem; }
-      .about { grid-template-columns: 1fr; gap: 4rem; padding: 6rem 3rem; }
-      .about-visual { height: 350px; }
-      .credentials { padding: 2rem 3rem; flex-wrap: wrap; }
-      .books-grid { grid-template-columns: 1fr; }
-      .ministries-grid { grid-template-columns: 1fr; }
-      .speaking-grid { grid-template-columns: 1fr; gap: 4rem; }
-      .media-grid { grid-template-columns: 1fr 1fr; }
-      .contact { grid-template-columns: 1fr; gap: 4rem; padding: 6rem 3rem; }
-      .footer-top { grid-template-columns: 1fr 1fr; }
-      .nav { padding: 1.5rem 2rem; }
-      .nav-links { gap: 1.5rem; }
+    /* ── RESPONSIVE ── */
+    @media(max-width:1024px){
+      .hero { grid-template-columns:1fr; }
+      .hero-right { display:none; }
+      .hero-left { padding:7rem 6vw 5rem; }
+      .about { grid-template-columns:1fr; }
+      .mosaic { order:-1; }
+      .stats { grid-template-columns:repeat(2,1fr); }
+      .ministries { grid-template-columns:1fr; }
+      .videos-grid { grid-template-columns:1fr; }
+      .books-grid { grid-template-columns:1fr; }
+      .books-grid .bk-card { border-right:none; border-bottom:2px solid var(--c-border); }
+      .speaking-inner { grid-template-columns:1fr; }
+      .speaking-aside { position:static; }
+      .contact { grid-template-columns:1fr; }
+      .contact-hero-img { aspect-ratio:16/9; }
+      .ft-top { grid-template-columns:1fr 1fr; }
     }
   `}</style>
 );
 
-// ─── ANIMATION VARIANTS ────────────────────────────────────────────────────────
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.8, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }
-  })
-};
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    transition: { duration: 0.9, delay: i * 0.1, ease: "easeOut" }
-  })
-};
-const lineGrow = {
-  hidden: { scaleX: 0 },
-  visible: { scaleX: 1, transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } }
-};
-
-// ─── REVEAL WRAPPER ────────────────────────────────────────────────────────────
-function Reveal({ children, delay = 0, direction = "up", className = "" }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  const yVal = direction === "up" ? 40 : direction === "down" ? -40 : 0;
-  const xVal = direction === "left" ? 40 : direction === "right" ? -40 : 0;
+// ── CURSOR ────────────────────────────────────────────────────────────────────
+function Cursor() {
+  const mx = useMotionValue(-100), my = useMotionValue(-100);
+  const rx = useSpring(mx, { stiffness:200, damping:22 });
+  const ry = useSpring(my, { stiffness:200, damping:22 });
+  useEffect(() => {
+    const move = e => { mx.set(e.clientX); my.set(e.clientY); };
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, []);
   return (
-    <motion.div
-      ref={ref}
-      className={className}
-      initial={{ opacity: 0, y: yVal, x: xVal }}
-      animate={inView ? { opacity: 1, y: 0, x: 0 } : {}}
-      transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
+    <>
+      <motion.div className="cur-dot" style={{ left: mx, top: my }} />
+      <motion.div className="cur-circle" style={{ left: rx, top: ry }} />
+    </>
   );
 }
 
-// ─── NAV ───────────────────────────────────────────────────────────────────────
-function Nav({ active, setActive }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+// ── REVEAL ────────────────────────────────────────────────────────────────────
+function R({ children, delay=0, y=36, x=0, className="" }) {
+  const ref = useRef(null);
+  const inV = useInView(ref, { once:true, margin:"-60px" });
+  return (
+    <motion.div ref={ref} className={className}
+      initial={{ opacity:0, y, x }}
+      animate={inV ? { opacity:1, y:0, x:0 } : {}}
+      transition={{ duration:.85, delay, ease:[.22,1,.36,1] }}
+    >{children}</motion.div>
+  );
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function Nav() {
+  const [bg, setBg] = useState(false);
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 50);
+    const fn = () => setBg(window.scrollY > 40);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
-  const links = ["About","Books","Ministries","Speaking","Media","Contact"];
   return (
-    <motion.nav
-      className={`nav ${scrolled ? "scrolled" : ""}`}
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+    <motion.header className={`nav ${bg?"bg":""}`}
+      initial={{ y:-80, opacity:0 }}
+      animate={{ y:0, opacity:1 }}
+      transition={{ duration:.7, ease:[.22,1,.36,1] }}
     >
-      <a className="nav-logo" href="#home">
-        Dr. Kunle <span>Hamilton</span>
-      </a>
-      <div className="nav-links">
-        {links.map(l => (
-          <a
-            key={l}
-            className="nav-link"
-            href={`#${l.toLowerCase()}`}
-            onClick={() => setActive(l)}
-          >
-            {l}
-          </a>
+      <a className="logo" href="#home">Dr. Kunle <em>Hamilton</em></a>
+      <nav className="nav-links">
+        {["About","Ministries","Videos","Books","Speaking","Contact"].map(l => (
+          <a key={l} className="nl" href={`#${l.toLowerCase()}`}>{l}</a>
         ))}
-        <a className="nav-cta" href="#contact">Book a Session</a>
-      </div>
-    </motion.nav>
+        <a className="nav-btn" href="#contact">Book a Session</a>
+      </nav>
+    </motion.header>
   );
 }
 
-// ─── HERO ──────────────────────────────────────────────────────────────────────
+// ── HERO ──────────────────────────────────────────────────────────────────────
 function Hero() {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 600], [0, 120]);
-  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const imgY = useTransform(scrollY, [0,600], [0,80]);
   return (
     <section className="hero" id="home">
       <div className="hero-left">
-        <motion.div
-          className="hero-eyebrow"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+        <motion.div className="hero-tag"
+          initial={{ opacity:0, x:-30 }} animate={{ opacity:1, x:0 }}
+          transition={{ duration:.7, delay:.4 }}
         >
-          Prophet · Author · Media Veteran · Shepherd
+          <span className="hero-tag-line" />
+          Prophet · Scholar · Shepherd · Author
         </motion.div>
-        <motion.h1
-          className="hero-title"
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+
+        <motion.h1 className="hero-h1"
+          initial={{ opacity:0, y:70 }} animate={{ opacity:1, y:0 }}
+          transition={{ duration:1, delay:.55, ease:[.22,1,.36,1] }}
         >
-          <span className="dr">Dr.</span>
-          Kunle<br /><em>Hamilton</em>
+          <span className="light">Dr. Kunle</span>
+          <span className="gold">Hamilton</span>
         </motion.h1>
-        <motion.p
-          className="hero-subtitle"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.8 }}
+
+        <motion.div className="hero-rule"
+          initial={{ scaleX:0 }} animate={{ scaleX:1 }}
+          transition={{ duration:1.2, delay:.9, ease:[.22,1,.36,1] }}
+        />
+
+        <motion.p className="hero-p"
+          initial={{ opacity:0, y:24 }} animate={{ opacity:1, y:0 }}
+          transition={{ duration:.8, delay:1 }}
         >
-          A voice that bridges faith, scholarship, and culture — transforming lives across continents through ministry, mentorship, and media.
+          A voice that bridges faith, scholarship and culture. Prophet, media veteran, bestselling author and founder of CCC PraiseVille &amp; ShaddaiVille Ministries — transforming lives across five nations.
         </motion.p>
-        <motion.div
-          className="hero-actions"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
+
+        <motion.div className="hero-actions"
+          initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
+          transition={{ duration:.8, delay:1.15 }}
         >
-          <a className="btn-primary" href="#about">Discover His Legacy</a>
-          <a className="btn-ghost" href="#media">Watch & Listen</a>
+          <a className="btn-solid" href="#about">Discover His Legacy</a>
+          <a className="btn-line" href="#videos">Watch Teachings</a>
         </motion.div>
+
+        <div className="scroll-cue">
+          <span className="scroll-cue-text">Scroll</span>
+          <motion.div className="scroll-cue-line"
+            animate={{ scaleY:[0,1,0] }}
+            transition={{ duration:2, repeat:Infinity, ease:"easeInOut" }}
+          />
+        </div>
       </div>
-      <div className="hero-right">
-        <motion.div
-          className="hero-image-placeholder"
-          style={{ y, opacity }}
-        >
-          <div className="hero-monogram">KH</div>
-          <div className="hero-cross" />
-          <div className="hero-ornament">PraiseVille Global · ShaddaiVille Ministries</div>
-        </motion.div>
-      </div>
-      {/* Animated gold line across bottom */}
-      <motion.div
-        style={{
-          position: "absolute", bottom: 0, left: 0,
-          height: "2px", background: "var(--gold)",
-          transformOrigin: "left"
-        }}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 1.5, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+
+      <motion.div className="hero-right" style={{ y: imgY }}>
+        <img src={IMG_PREACHING} alt="Dr. Kunle Hamilton preaching" className="hero-img" />
+        <div className="hero-img-overlay" />
+        <div className="hero-caption">Senior Shepherd · CCC PraiseVille Global</div>
+        <div className="hero-number">Lagos · Berlin · London · USA</div>
+      </motion.div>
+
+      {/* Animated gold border */}
+      <motion.div style={{
+        position:"absolute", bottom:0, left:0, height:"2px", background:"var(--c-gold)",
+        transformOrigin:"left", width:"100%"
+      }}
+        initial={{ scaleX:0 }} animate={{ scaleX:1 }}
+        transition={{ duration:1.5, delay:1.3, ease:[.22,1,.36,1] }}
       />
     </section>
   );
 }
 
-// ─── CREDENTIALS ───────────────────────────────────────────────────────────────
-function Credentials() {
-  const stats = [
-    { num: "40+", label: "Years in Ministry" },
-    { num: "5", label: "Countries of Impact" },
-    { num: "2", label: "Thriving Ministries" },
-    { num: "∞", label: "Lives Transformed" },
-  ];
+// ── MARQUEE ───────────────────────────────────────────────────────────────────
+const marqueeItems = ["Prophet","Scholar","Media Veteran","Author","Shepherd","PraiseVille Global","ShaddaiVille International","Discipleship","Leadership","Faith"];
+function Marquee() {
+  const all = [...marqueeItems, ...marqueeItems];
   return (
-    <Reveal>
-      <div className="credentials">
-        {stats.map((s, i) => (
-          <div className="credential-item" key={i}>
-            <div className="credential-number">{s.num}</div>
-            <div className="credential-label">{s.label}</div>
-          </div>
+    <div className="marquee-wrap">
+      <div className="marquee-track">
+        {all.map((t,i) => (
+          <span key={i} className="marquee-item">
+            {t}<span className="marquee-dot" />
+          </span>
         ))}
       </div>
-    </Reveal>
+    </div>
   );
 }
 
-// ─── ABOUT ─────────────────────────────────────────────────────────────────────
+// ── ABOUT ─────────────────────────────────────────────────────────────────────
 function About() {
   return (
     <section className="about" id="about">
-      <div className="about-visual">
-        <Reveal direction="left">
-          <div className="about-frame">
-            <div className="frame-monogram">KH</div>
-            <div className="frame-cross-v" />
+      {/* Photo mosaic */}
+      <R x={-40} y={0}>
+        <div className="mosaic" style={{ position:"relative" }}>
+          <div className="mosaic-a">
+            <img src={IMG_FORMAL} alt="Dr. Kunle Hamilton — formal portrait" />
+            <div className="mosaic-label">Prophet · Scholar</div>
+            <div className="mosaic-gold-bar" />
           </div>
-        </Reveal>
-        <Reveal delay={0.3} direction="right">
-          <div className="about-card">
-            <div className="about-card-quote">
-              "God didn't choose Germany. Germany chose me. Better still — God made this a successful missionary journey."
+          <div className="mosaic-b">
+            <img src={IMG_SPEAKING} alt="Dr. Kunle Hamilton speaking" />
+            <div className="mosaic-label">In Ministry</div>
+            <div className="mosaic-gold-bar" />
+          </div>
+          <div className="mosaic-c">
+            <img src={IMG_PREACHING} alt="Dr. Kunle Hamilton preaching" />
+            <div className="mosaic-label">CCC PraiseVille</div>
+            <div className="mosaic-gold-bar" />
+          </div>
+          <div className="mosaic-quote">
+            <div className="mosaic-quote-text">
+              "If God had not arrested me with the drama of the Celestial Church, He would have lost me to atheism."
             </div>
-            <div className="about-card-attr">— Dr. Kunle Hamilton</div>
+            <div className="mosaic-quote-by">— Dr. Kunle Hamilton</div>
           </div>
-        </Reveal>
-      </div>
+        </div>
+      </R>
 
       <div className="about-body">
-        <Reveal>
-          <div className="section-label">The Man Behind the Ministry</div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="section-title">
-            A Prophet. A Scholar.<br /><em>A Shepherd.</em>
+        <R><div className="sec-eyebrow">The Man Behind the Ministry</div></R>
+        <R delay={.1}>
+          <h2 className="sec-h2">
+            A Philosopher<br />Who Found <em>God.</em>
           </h2>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p className="about-text">
-            Dr. Kunle Hamilton is one of Nigeria's most remarkable multi-disciplinary voices — a prophet of the Celestial Church of Christ, a veteran journalist, a reputation management expert, and a transformative spiritual leader whose reach extends across four continents.
-          </p>
-          <p className="about-text">
-            A Philosophy graduate and Mass Communication scholar from the University of Lagos, Dr. Hamilton fuses rigorous academic thinking with prophetic grace. His is a ministry of discipleship, not spectacle — of nation-building through faith, education, and empowerment.
-          </p>
-        </Reveal>
-        <Reveal delay={0.3}>
-          <div className="about-roles">
-            <div className="about-role">
-              <strong>Senior Shepherd — CCC PraiseVille Global</strong>
-              Celestial Church parishes in Nigeria, Germany, UK & USA
-            </div>
-            <div className="about-role">
-              <strong>Founder & President — ShaddaiVille Ministries International</strong>
-              Non-denominational discipleship, leadership & entrepreneurship training
-            </div>
-            <div className="about-role">
-              <strong>CEO — Virgin Outdoor</strong>
-              Lagos-based perception management & brand communication consultancy
-            </div>
-            <div className="about-role">
-              <strong>International Author</strong>
-              Published in 18 countries across Europe by Lambert Academic Publishing
-            </div>
+        </R>
+        <R delay={.2}>
+          <p>Dr. Kunle Hamilton is one of Nigeria's most remarkable multi-disciplinary voices — a Prophet of the Celestial Church of Christ, a veteran journalist and media executive, reputation management expert, international author, and a transformative spiritual leader whose reach spans four continents.</p>
+          <p>A Philosophy first-class graduate (Best Student, 1985) and Mass Communication scholar from the University of Lagos, Dr. Hamilton fuses rigorous academic thought with prophetic grace. His ministry is defined by discipleship, nation-building, and the empowerment of the next generation.</p>
+        </R>
+        <R delay={.3}>
+          <div className="about-pills">
+            {["Prophet · CCC","Philosophy BA — UNILAG","M.Sc. Mass Comm.","Veteran Journalist","Reputation Manager","International Author","CEO — Virgin Outdoor","Lambert Academic Publishing"].map(p => (
+              <span key={p} className="pill">{p}</span>
+            ))}
           </div>
-        </Reveal>
-        <Reveal delay={0.4}>
-          <a className="btn-primary" href="#contact" style={{ display: "inline-block" }}>
+        </R>
+        <R delay={.4}>
+          <a className="btn-solid" href="#contact" style={{ display:"inline-block" }}>
             Connect with Dr. Hamilton
           </a>
-        </Reveal>
+        </R>
       </div>
     </section>
   );
 }
 
-// ─── BOOKS ─────────────────────────────────────────────────────────────────────
-function Books() {
-  const books = [
-    {
-      title: "Releasing the Eagle in You",
-      desc: "An eight-chapter inspirational work on leadership and self-actualization — a guide to unlocking the greatness God has placed within every person.",
-      tag: "Leadership"
-    },
-    {
-      title: "Journey to Understanding",
-      desc: "A philosophical investigation of how style and content impact the spoken word, using the church and radio broadcasting as its remarkable canvas.",
-      tag: "Philosophy"
-    },
-    {
-      title: "The ShaddaiVille Mandate",
-      desc: "Dr. Hamilton's vision for discipleship-driven ministry that transcends denominational walls, building leaders across faith traditions and vocations.",
-      tag: "Ministry"
-    }
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function Stats() {
+  const items = [
+    { n:"40+", l:"Years in Ministry" },
+    { n:"5",   l:"Nations of Impact" },
+    { n:"2",   l:"Thriving Ministries" },
+    { n:"18",  l:"Countries — Books Published" },
   ];
   return (
-    <section className="books" id="books">
-      <div className="books-header">
-        <Reveal><div className="section-label" style={{ color: "var(--gold-light)", justifyContent: "center" }}>Written Works</div></Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="books-title">Books & <em>Publications</em></h2>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", marginTop: "1rem", fontWeight: 300, maxWidth: 520, margin: "1rem auto 0" }}>
-            Words that have crossed oceans. Truths that have shaped generations.
-          </p>
-        </Reveal>
-      </div>
-      <div className="books-grid">
-        {books.map((b, i) => (
-          <Reveal delay={i * 0.15} key={i}>
-            <div className="book-card">
-              <div className="book-icon">
-                <span className="book-icon-text">{b.tag[0]}</span>
-              </div>
-              <div style={{ fontSize: "0.58rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--gold-light)", marginBottom: "0.8rem" }}>{b.tag}</div>
-              <div className="book-title">{b.title}</div>
-              <div className="book-desc">{b.desc}</div>
-              <a className="book-link" href="#contact">Request a Copy →</a>
-            </div>
-          </Reveal>
+    <R>
+      <div className="stats">
+        {items.map((s,i) => (
+          <motion.div key={i} className="stat-item"
+            initial={{ opacity:0, y:20 }}
+            whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true }}
+            transition={{ delay:i*.12, duration:.7 }}
+          >
+            <div className="stat-num">{s.n}</div>
+            <div className="stat-label">{s.l}</div>
+          </motion.div>
         ))}
       </div>
-    </section>
+    </R>
   );
 }
 
-// ─── MINISTRIES ────────────────────────────────────────────────────────────────
+// ── MINISTRIES ────────────────────────────────────────────────────────────────
 function Ministries() {
   return (
     <section className="ministries" id="ministries">
-      <div className="ministries-header">
-        <Reveal><div className="section-label">Twin Pillars of Purpose</div></Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="section-title">The <em>Ministries</em></h2>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p style={{ color: "var(--mist)", fontSize: "0.88rem", marginTop: "1rem", fontWeight: 300, maxWidth: 540, margin: "1rem auto 0" }}>
-            Two expressions of one divine mandate — rooted in worship, growing in grace, expanding in love.
+      <R x={-30} y={0}>
+        <div className="min-panel min-panel-pv" style={{ display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:"8rem 5vw", position:"relative", overflow:"hidden", minHeight:"80vh" }}>
+          <div className="min-bg-word">PV</div>
+          <div className="min-tag">Celestial Church of Christ</div>
+          <h3 className="min-h3">CCC <em>PraiseVille</em><br />Global</h3>
+          <p className="min-p">
+            Founded in Berlin, Germany on May 8, 2016 and now flourishing across Nigeria, UK, USA and Germany. PraiseVille is a place of authentic worship, genuine prophecy, and deep fellowship — the Celestial Church alive in the modern world.
           </p>
-        </Reveal>
+          <div className="min-facts">
+            <div><div className="mf-num">4+</div><div className="mf-lbl">Countries</div></div>
+            <div><div className="mf-num">2016</div><div className="mf-lbl">Founded Berlin</div></div>
+            <div><div className="mf-num">7+</div><div className="mf-lbl">Festival of Word</div></div>
+          </div>
+          <a className="min-btn" href="#contact">Visit PraiseVille →</a>
+        </div>
+      </R>
+      <R x={30} y={0}>
+        <div className="min-panel min-panel-sh" style={{ display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:"8rem 5vw", position:"relative", overflow:"hidden", minHeight:"80vh" }}>
+          <div className="min-bg-word">SV</div>
+          <div className="min-tag">Non-Denominational · Global Training</div>
+          <h3 className="min-h3">ShaddaiVille<br /><em>Ministries</em><br />International</h3>
+          <p className="min-p">
+            "God's City" — training Christians and Muslims alike in UK-certificated leadership and entrepreneurship since 2007. Free of charge. Branches in Nigeria, USA, UK, Germany and Canada.
+          </p>
+          <div className="min-facts">
+            <div><div className="mf-num">5</div><div className="mf-lbl">Nations</div></div>
+            <div><div className="mf-num">2007</div><div className="mf-lbl">Est. Nigeria</div></div>
+            <div><div className="mf-num">UK</div><div className="mf-lbl">Certified Academy</div></div>
+          </div>
+          <a className="min-btn" href="#contact">Explore ShaddaiVille →</a>
+        </div>
+      </R>
+    </section>
+  );
+}
+
+// ── VIDEOS ────────────────────────────────────────────────────────────────────
+function Videos() {
+  // Real Facebook video IDs found in search results
+  const vids = [
+    {
+      embedUrl: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcelestial.focus%2Fvideos%2F1356642479037237&show_text=false&mute=0",
+      title: "Dr. Kunle Hamilton Teaches Discipleship",
+      tag: "Discipleship · Teaching",
+      src: "CelestialFocus · Facebook"
+    },
+    {
+      embedUrl: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fhephzibahtelevision%2Fvideos%2F449065333576250&show_text=false&mute=0",
+      title: "Meeting with Dr. Kunle Hamilton — The Roles of Leadership",
+      tag: "Leadership · Interview",
+      src: "Hephzibah Television · Facebook"
+    },
+    {
+      embedUrl: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcelestial.focus%2Fvideos%2F1241668604555889&show_text=false&mute=0",
+      title: "Christmas Celebration — CCC PraiseVille Highlight",
+      tag: "Worship · Celebration",
+      src: "CelestialFocus · Facebook"
+    },
+  ];
+  return (
+    <section className="videos" id="videos">
+      <div className="videos-header">
+        <R><div className="sec-eyebrow">Teachings, Sermons & Interviews</div></R>
+        <R delay={.1}><h2 className="sec-h2">Watch Dr. Hamilton<br /><em>In Action</em></h2></R>
       </div>
-
-      <div className="ministries-grid">
-        {/* PraiseVille */}
-        <Reveal direction="left">
-          <div className="ministry-panel praiseville">
-            <div className="ministry-bg-text">PV</div>
-            <div className="ministry-eyebrow">Celestial Church of Christ</div>
-            <div className="ministry-name">CCC<br /><em>PraiseVille</em><br />Global</div>
-            <div className="ministry-desc">
-              A spirit-filled Celestial Church community founded in Berlin, Germany in 2016 — and now flourishing in Nigeria, the UK, the USA and beyond. PraiseVille is a place of genuine worship, authentic prophecy, and transformational fellowship.
-            </div>
-            <div className="ministry-facts">
-              <div>
-                <div className="ministry-fact-num">4+</div>
-                <div className="ministry-fact-label">Countries</div>
-              </div>
-              <div>
-                <div className="ministry-fact-num">2016</div>
-                <div className="ministry-fact-label">Founded Berlin</div>
-              </div>
-              <div>
-                <div className="ministry-fact-num">7+</div>
-                <div className="ministry-fact-label">Festival of the Word</div>
+      <div className="videos-grid">
+        {vids.map((v,i) => (
+          <R key={i} delay={i*.15}>
+            <div className="vid-card">
+              <iframe
+                className="vid-embed"
+                src={v.embedUrl}
+                style={{ border:"none", overflow:"hidden" }}
+                scrolling="no"
+                frameBorder="0"
+                allowFullScreen={true}
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                title={v.title}
+              />
+              <div className="vid-info">
+                <span className="vid-tag">{v.tag}</span>
+                <div className="vid-title">{v.title}</div>
+                <div className="vid-source">{v.src}</div>
               </div>
             </div>
-            <a className="ministry-btn" href="#contact">Visit PraiseVille →</a>
-          </div>
-        </Reveal>
-
-        {/* ShaddaiVille */}
-        <Reveal direction="right">
-          <div className="ministry-panel shaddai">
-            <div className="ministry-bg-text">SV</div>
-            <div className="ministry-eyebrow">Non-Denominational · Leadership Training</div>
-            <div className="ministry-name">ShaddaiVille<br /><em>Ministries</em><br />International</div>
-            <div className="ministry-desc">
-              "God's City" — a non-denominational discipleship movement training Christians and Muslims alike in UK-certificated leadership and entrepreneurship. Free of charge. Building moral beacons across nations since 2007.
-            </div>
-            <div className="ministry-facts">
-              <div>
-                <div className="ministry-fact-num">5</div>
-                <div className="ministry-fact-label">Nations</div>
-              </div>
-              <div>
-                <div className="ministry-fact-num">2007</div>
-                <div className="ministry-fact-label">Est. Nigeria</div>
-              </div>
-              <div>
-                <div className="ministry-fact-num">UK</div>
-                <div className="ministry-fact-label">Certified Academy</div>
-              </div>
-            </div>
-            <a className="ministry-btn" href="#contact">Explore ShaddaiVille →</a>
-          </div>
-        </Reveal>
+          </R>
+        ))}
       </div>
     </section>
   );
 }
 
-// ─── SPEAKING ──────────────────────────────────────────────────────────────────
+// ── BOOKS ─────────────────────────────────────────────────────────────────────
+function Books() {
+  const bks = [
+    { tag:"Leadership", title:"Releasing the Eagle in You", desc:"An eight-chapter inspirational work on leadership and self-actualization — a guide to unlocking the greatness God placed within every person. Published internationally in 18 countries." },
+    { tag:"Philosophy", title:"Journey to Understanding", desc:"A philosophical investigation of how style and content impact the spoken word, using the church, a preacher and his congregation, plus Raypower 100.5 FM as its remarkable canvas." },
+    { tag:"Ministry", title:"The ShaddaiVille Vision", desc:"Dr. Hamilton's framework for discipleship-driven ministry that transcends denominational walls — building leaders, entrepreneurs and moral beacons across faith traditions and nations." },
+  ];
+  return (
+    <section className="books" id="books">
+      <R><div className="sec-eyebrow">Written Works</div></R>
+      <R delay={.1}><h2 className="sec-h2" style={{ marginBottom:0 }}>Books &amp; <em>Publications</em></h2></R>
+      <div className="books-grid">
+        {bks.map((b,i) => (
+          <R key={i} delay={i*.12}>
+            <div className="bk-card">
+              <div className="bk-num">0{i+1}</div>
+              <div className="bk-tag">{b.tag}</div>
+              <div className="bk-title">{b.title}</div>
+              <div className="bk-desc">{b.desc}</div>
+              <a className="bk-link" href="#contact">Order a Copy →</a>
+            </div>
+          </R>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── SPEAKING ──────────────────────────────────────────────────────────────────
 function Speaking() {
-  const events = [
-    { day: "12", month: "Apr", name: "Festival of the Word — Annual Harvest", loc: "Lagos, Nigeria", type: "Worship & Teaching" },
-    { day: "03", month: "May", name: "ShaddaiVille Leadership Retreat", loc: "London, United Kingdom", type: "Leadership Academy" },
-    { day: "21", month: "Jun", name: "Teenagers' Motivational Summit", loc: "Berlin, Germany", type: "Youth Empowerment" },
-    { day: "08", month: "Aug", name: "Ephphatha Non-Denominational Crusade", loc: "Lagos, Nigeria", type: "Evangelism" },
-    { day: "15", month: "Sep", name: "Media & Ministry — Public Lecture", loc: "University of Lagos", type: "Academic" },
+  const evs = [
+    { d:"12", m:"Apr", name:"Festival of the Word — Annual Harvest", loc:"Lagos, Nigeria", type:"Worship & Teaching" },
+    { d:"03", m:"May", name:"ShaddaiVille UK Leadership Retreat", loc:"London, United Kingdom", type:"Leadership Academy" },
+    { d:"21", m:"Jun", name:"Teenagers' Motivational Summit", loc:"Berlin, Germany", type:"Youth Empowerment" },
+    { d:"08", m:"Aug", name:"Ephphatha Non-Denominational Crusade", loc:"Lagos, Nigeria", type:"Evangelism" },
+    { d:"15", m:"Sep", name:"Media & Ministry — Public Lecture", loc:"University of Lagos", type:"Academic Talk" },
   ];
   return (
     <section className="speaking" id="speaking">
-      <div className="speaking-grid">
-        <div>
-          <Reveal><div className="section-label">Events & Engagements</div></Reveal>
-          <Reveal delay={0.1}><h2 className="section-title">Speaking &<br /><em>Appearances</em></h2></Reveal>
-          <div className="events-list" style={{ marginTop: "3rem" }}>
-            {events.map((e, i) => (
-              <Reveal delay={i * 0.1} key={i}>
-                <div className="event-item">
-                  <div className="event-date">
-                    <div className="event-day">{e.day}</div>
-                    <div className="event-month">{e.month}</div>
-                  </div>
-                  <div>
-                    <div className="event-name">{e.name}</div>
-                    <div className="event-meta">
-                      <span>📍 {e.loc}</span>
-                      <span style={{ color: "var(--gold)" }}>· {e.type}</span>
-                    </div>
+      <div className="speaking-inner">
+        <div className="speaking-aside">
+          <R><div className="sec-eyebrow">Events & Engagements</div></R>
+          <R delay={.1}><h2 className="sec-h2">Speaking &amp;<br /><em>Appearances</em></h2></R>
+          <R delay={.2}>
+            <div className="aside-quote">
+              <div className="aside-quote-text">
+                "The responsibility of religious leaders is to guide young people towards righteousness — not to encourage them to chase fame through questionable means."
+              </div>
+              <div className="aside-quote-by">— Dr. Kunle Hamilton</div>
+            </div>
+          </R>
+          <R delay={.35}>
+            <div style={{ marginTop:"2.5rem" }}>
+              <a className="btn-solid" href="#contact">Invite Dr. Hamilton</a>
+            </div>
+          </R>
+        </div>
+        <div className="ev-list">
+          {evs.map((e,i) => (
+            <R key={i} delay={i*.1} x={30} y={0}>
+              <div className="ev-item">
+                <div className="ev-date">
+                  <div className="ev-day">{e.d}</div>
+                  <div className="ev-mon">{e.m}</div>
+                </div>
+                <div>
+                  <div className="ev-name">{e.name}</div>
+                  <div className="ev-meta">
+                    <span>📍 {e.loc}</span>
+                    <span className="ev-type">· {e.type}</span>
                   </div>
                 </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-        <div className="speaking-quote">
-          <Reveal delay={0.3}>
-            <div className="big-quote">"</div>
-            <div className="quote-text">
-              The responsibility of religious leaders is to guide young people towards righteousness — not to encourage them to chase fame through questionable means.
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: 40, height: 1, background: "var(--gold)" }} />
-              <span style={{ fontSize: "0.65rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--mist)" }}>Dr. Kunle Hamilton</span>
-            </div>
-            <div style={{ marginTop: "3rem" }}>
-              <a className="btn-primary" href="#contact" style={{ display: "inline-block" }}>
-                Invite Dr. Hamilton to Speak
-              </a>
-            </div>
-          </Reveal>
+              </div>
+            </R>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-// ─── MEDIA ─────────────────────────────────────────────────────────────────────
-function Media() {
-  const items = [
-    { tag: "Sermon", title: "Discipleship: The Heart of the Gospel", meta: "CCC PraiseVille · 2025" },
-    { tag: "Interview", title: "Social Media Can Make or Mar a Brand", meta: "Business Hallmark · Feature" },
-    { tag: "Teaching", title: "The Roles of Leadership in the Church", meta: "Hephzibah Television" },
-    { tag: "Sermon", title: "A Tribute to Professor Odeyemi at 89", meta: "CCC PraiseVille · 2020" },
-    { tag: "Lecture", title: "Understanding Through Style & Content", meta: "Raypower 100.5 FM · Series" },
-    { tag: "Teaching", title: "GOs & the Image of the Church Today", meta: "Sunday Telegraph Interview" },
-  ];
-  return (
-    <section className="media-section" id="media">
-      <div style={{ textAlign: "center" }}>
-        <Reveal><div className="section-label" style={{ justifyContent: "center" }}>Sermons, Interviews & Teachings</div></Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="section-title" style={{ fontSize: "clamp(2.8rem,5vw,5rem)" }}>
-            Media & <em>Sermons</em>
-          </h2>
-        </Reveal>
-      </div>
-      <div className="media-grid">
-        {items.map((m, i) => (
-          <Reveal delay={i * 0.1} key={i}>
-            <div className="media-card">
-              <div className="media-thumb">
-                <div className="media-thumb-bg" />
-                <div className="media-tag">{m.tag}</div>
-                <div className="play-icon" />
-              </div>
-              <div className="media-info">
-                <div className="media-title">{m.title}</div>
-                <div className="media-meta">{m.meta}</div>
-              </div>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── CONTACT ───────────────────────────────────────────────────────────────────
+// ── CONTACT ───────────────────────────────────────────────────────────────────
 function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", inquiry: "general", message: "" });
+  const [f, setF] = useState({ name:"", email:"", inquiry:"speaking", msg:"" });
   const [sent, setSent] = useState(false);
-  const handleSubmit = (e) => { e.preventDefault(); setSent(true); };
-
   return (
     <section className="contact" id="contact">
-      <div className="contact-left">
-        <Reveal><div className="section-label" style={{ color: "var(--gold-light)" }}>Get in Touch</div></Reveal>
-        <Reveal delay={0.1}>
-          <h2 className="section-title" style={{ color: "var(--white)" }}>
-            Let's <em>Connect</em>
-          </h2>
-        </Reveal>
-        <Reveal delay={0.2}>
-          <p className="contact-desc">
-            For speaking engagements, ministry inquiries, media requests, book orders, or to reach Dr. Hamilton's team — reach out and we will respond with care.
-          </p>
-        </Reveal>
-        {[
-          { icon: "✦", label: "Ministry", value: "CCC PraiseVille Global · ShaddaiVille International" },
-          { icon: "✦", label: "Based In", value: "Lagos, Nigeria · Berlin, Germany · London, UK" },
-          { icon: "✦", label: "Media & PR", value: "Virgin Outdoor Communications, Lagos" },
-        ].map((d, i) => (
-          <Reveal delay={0.3 + i * 0.1} key={i}>
-            <div className="contact-detail">
-              <div className="contact-icon">{d.icon}</div>
-              <div>
-                <div className="contact-detail-label">{d.label}</div>
-                <div className="contact-detail-value">{d.value}</div>
-              </div>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-
-      <Reveal delay={0.2}>
+      <R x={-30} y={0}>
         <div>
+          <img src={IMG_SPEAKING} alt="Dr. Kunle Hamilton" className="contact-hero-img" />
+        </div>
+      </R>
+      <R delay={.15}>
+        <div className="contact-right">
+          <div className="sec-eyebrow">Get in Touch</div>
+          <h2 className="sec-h2">Let's <em>Connect</em></h2>
+          {[
+            { icon:"✦", label:"Ministry", val:"CCC PraiseVille Global · ShaddaiVille International" },
+            { icon:"✦", label:"Based In", val:"Lagos, Nigeria · Berlin, Germany · London, UK" },
+            { icon:"✦", label:"Media & PR", val:"Virgin Outdoor Communications, Lagos" },
+          ].map((d,i) => (
+            <div className="c-detail" key={i}>
+              <div className="c-icon">{d.icon}</div>
+              <div><div className="c-lbl">{d.label}</div><div className="c-val">{d.val}</div></div>
+            </div>
+          ))}
           {sent ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={{ textAlign: "center", padding: "4rem 2rem" }}
-            >
-              <div style={{ fontFamily: "Cormorant Garamond", fontSize: "4rem", color: "var(--gold-light)", marginBottom: "1rem" }}>✦</div>
-              <div style={{ fontFamily: "Cormorant Garamond", fontSize: "2rem", color: "var(--white)", marginBottom: "1rem" }}>Message Received</div>
-              <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem", fontWeight: 300 }}>Dr. Hamilton's team will be in touch with you shortly.</div>
+            <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
+              style={{ marginTop:"2.5rem", padding:"2.5rem", background:"var(--c-surface)",
+                       border:"1px solid var(--c-border)", textAlign:"center" }}>
+              <div style={{ fontFamily:"Playfair Display,serif", fontSize:"2rem",
+                            color:"var(--c-gold)", marginBottom:".8rem" }}>✦</div>
+              <div style={{ fontFamily:"Playfair Display,serif", fontSize:"1.4rem",
+                            marginBottom:".5rem" }}>Message Received</div>
+              <div style={{ fontSize:".8rem", color:"var(--c-muted)", fontWeight:300 }}>
+                Dr. Hamilton's team will be in touch shortly.
+              </div>
             </motion.div>
           ) : (
-            <form className="contact-form" onSubmit={handleSubmit}>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <input className="form-input" placeholder="Your name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Email Address</label>
-                  <input className="form-input" type="email" placeholder="your@email.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-                </div>
+            <form className="cform" onSubmit={e => { e.preventDefault(); setSent(true); }}>
+              <div className="crow">
+                <div className="cfg"><label className="cfl">Full Name</label>
+                  <input className="cfi" placeholder="Your name" value={f.name} onChange={e=>setF({...f,name:e.target.value})} required /></div>
+                <div className="cfg"><label className="cfl">Email</label>
+                  <input className="cfi" type="email" placeholder="your@email.com" value={f.email} onChange={e=>setF({...f,email:e.target.value})} required /></div>
               </div>
-              <div className="form-group">
-                <label className="form-label">Nature of Inquiry</label>
-                <select className="form-select" value={form.inquiry} onChange={e => setForm({...form, inquiry: e.target.value})}>
+              <div className="cfg"><label className="cfl">Nature of Inquiry</label>
+                <select className="cfs" value={f.inquiry} onChange={e=>setF({...f,inquiry:e.target.value})}>
                   <option value="speaking">Speaking Engagement</option>
                   <option value="ministry">Ministry / Church</option>
                   <option value="books">Books & Publications</option>
                   <option value="media">Media / Interview</option>
                   <option value="leadership">ShaddaiVille Leadership Academy</option>
                   <option value="general">General Enquiry</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Subject</label>
-                <input className="form-input" placeholder="Brief subject" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Your Message</label>
-                <textarea className="form-textarea" placeholder="Share your request or message here..." value={form.message} onChange={e => setForm({...form, message: e.target.value})} required />
-              </div>
-              <button className="form-submit" type="submit">Send Message →</button>
+                </select></div>
+              <div className="cfg"><label className="cfl">Message</label>
+                <textarea className="cfta" placeholder="Your message..." value={f.msg} onChange={e=>setF({...f,msg:e.target.value})} required /></div>
+              <button className="cfbtn" type="submit">Send Message →</button>
             </form>
           )}
         </div>
-      </Reveal>
+      </R>
     </section>
   );
 }
 
-// ─── FOOTER ────────────────────────────────────────────────────────────────────
+// ── FOOTER ────────────────────────────────────────────────────────────────────
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-top">
+      <div className="ft-top">
         <div>
-          <div className="footer-brand">Dr. Kunle <span>Hamilton</span></div>
-          <div className="footer-tagline">
-            Prophet. Scholar. Shepherd. Author. Media Veteran.<br />
-            Serving God and humanity across five nations.
-          </div>
-          <div style={{ width: 40, height: 1, background: "var(--gold-light)", opacity: 0.4 }} />
+          <div className="ft-brand">Dr. Kunle <em>Hamilton</em></div>
+          <div className="ft-tagline">Prophet · Scholar · Shepherd · Author · Media Veteran<br/>Serving God & humanity across five nations.</div>
+          <div className="ft-gold-sep" />
         </div>
         <div>
-          <div className="footer-col-title">Main Site</div>
-          {["About","Books","Speaking","Media","Contact"].map(l => (
-            <a key={l} className="footer-link" href={`#${l.toLowerCase()}`}>{l}</a>
+          <div className="ft-col-h">Main Site</div>
+          {["About","Videos","Books","Speaking","Contact"].map(l=>(
+            <a key={l} className="ftl" href={`#${l.toLowerCase()}`}>{l}</a>
           ))}
         </div>
         <div>
-          <div className="footer-col-title">CCC PraiseVille</div>
-          {["About PraiseVille","Sunday Services","Festival of the Word","Pastoral Team","Join Us"].map(l => (
-            <a key={l} className="footer-link" href="#ministries">{l}</a>
+          <div className="ft-col-h">CCC PraiseVille</div>
+          {["About PraiseVille","Sunday Services","Festival of the Word","Pastoral Team","Join Us"].map(l=>(
+            <a key={l} className="ftl" href="#ministries">{l}</a>
           ))}
         </div>
         <div>
-          <div className="footer-col-title">ShaddaiVille</div>
-          {["About ShaddaiVille","Leadership Academy","Teens Academy","Outreach","Partner With Us"].map(l => (
-            <a key={l} className="footer-link" href="#ministries">{l}</a>
+          <div className="ft-col-h">ShaddaiVille</div>
+          {["About ShaddaiVille","Leadership Academy","Teens Academy","Outreach","Partner With Us"].map(l=>(
+            <a key={l} className="ftl" href="#ministries">{l}</a>
           ))}
         </div>
       </div>
-      <div className="footer-bottom">
-        <div className="footer-copy">© 2025 Dr. Kunle Hamilton · All Rights Reserved</div>
-        <div className="footer-gold-line" />
-        <div className="footer-copy">PraiseVille Global · ShaddaiVille Ministries International</div>
+      <div className="ft-bottom">
+        <div className="ft-copy">© 2025 Dr. Kunle Hamilton · All Rights Reserved</div>
+        <div className="ft-gold-sep" />
+        <div className="ft-copy">PraiseVille Global · ShaddaiVille Ministries International</div>
       </div>
     </footer>
   );
 }
 
-// ─── CUSTOM CURSOR ─────────────────────────────────────────────────────────────
-function Cursor() {
-  const dot = useRef(null);
-  const ring = useRef(null);
-  useEffect(() => {
-    const move = (e) => {
-      if (dot.current) { dot.current.style.left = e.clientX - 4 + "px"; dot.current.style.top = e.clientY - 4 + "px"; }
-      if (ring.current) { ring.current.style.left = e.clientX - 18 + "px"; ring.current.style.top = e.clientY - 18 + "px"; }
-    };
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
-  }, []);
-  return (
-    <>
-      <div className="cursor" ref={dot} />
-      <div className="cursor-ring" ref={ring} />
-    </>
-  );
-}
-
-// ─── APP ───────────────────────────────────────────────────────────────────────
+// ── APP ───────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [active, setActive] = useState("Home");
-
   return (
     <>
-      <FontLink />
-      <div className="noise" />
+      <G />
       <Cursor />
-      <Nav active={active} setActive={setActive} />
+      <Nav />
       <Hero />
-      <Credentials />
+      <Marquee />
       <About />
-      <Books />
+      <Stats />
       <Ministries />
+      <Videos />
+      <Books />
       <Speaking />
-      <Media />
       <Contact />
       <Footer />
     </>
