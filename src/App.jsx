@@ -11,6 +11,8 @@ const P1 = "/dkh-hero.jpg";
 const P2 = "/dkh-teaching.jpg";
 // Original formal headshot — supplementary panels
 const P3 = "/dkh-formal.jpg";
+// New profile photo — blue background, pink suit, mic
+const P4 = "/dkh-profile.jpg";
 
 /* ─── STYLES ──────────────────────────────────────────────────────────────── */
 const Styles = () => (
@@ -643,6 +645,15 @@ function About() {
             ))}
           </div>
         </R>
+        <R delay={.35}>
+          <div style={{ display:"flex", alignItems:"center", gap:"1rem", padding:"1.2rem 1.4rem", background:"var(--ink2)", border:"1px solid var(--border-d)", marginBottom:"1.5rem" }}>
+            <img src={P4} alt="Dr. Kunle Hamilton" style={{ width:64, height:64, objectFit:"cover", objectPosition:"top", borderRadius:"50%", flexShrink:0, border:"2px solid var(--gold)" }} />
+            <div>
+              <div style={{ fontSize:".72rem", fontWeight:600, color:"var(--white)", marginBottom:".2rem" }}>Prophet (Dr.) Kunle Hamilton</div>
+              <div style={{ fontSize:".65rem", fontWeight:300, color:"var(--muted-d)", lineHeight:1.5 }}>Senior Shepherd, CCC PraiseVille Global<br/>President, ShaddaiVille Ministries International</div>
+            </div>
+          </div>
+        </R>
         <R delay={.4}><a className="b-gold" href="#contact" style={{ display: "inline-block" }}>Connect with Dr. Hamilton</a></R>
       </div>
     </section>
@@ -652,8 +663,8 @@ function About() {
 /* ─── MINISTRIES ─────────────────────────────────────────────────────────── */
 function Ministries() {
   const panels = [
-    { img: P2, tag: "Celestial Church of Christ", name: "CCC PraiseVille", nameEm: "Global", desc: "Founded in Berlin on May 8 2016, now flourishing across Nigeria, UK, USA and Germany. Authentic worship, genuine prophecy, deep fellowship — the Celestial Church alive in the modern world.", facts: [{ n: "4+", l: "Countries" }, { n: "2016", l: "Founded" }, { n: "7+", l: "Annual Harvest" }] },
-    { img: P1, tag: "Non-Denominational · Global Training", name: "ShaddaiVille", nameEm: "Ministries Int'l", desc: "\"God's City\" — UK-certified leadership & entrepreneurship since 2007. Free of charge. Christians and Muslims trained together as moral beacons across five nations.", facts: [{ n: "5", l: "Nations" }, { n: "2007", l: "Founded" }, { n: "UK", l: "Certified" }] }
+    { img: P2, tag: "Celestial Church of Christ", name: "CCC PraiseVille", nameEm: "Global", desc: "Mission: Disciple the nations with God in the House. Teaching Villers to succeed in their marriages, ministries, academics and professions in line with God's eternal will. Founded Berlin 2016 — now in Nigeria, UK, USA & Germany.", facts: [{ n: "4+", l: "Countries" }, { n: "2016", l: "Founded" }, { n: "7+", l: "Annual Harvest" }] },
+    { img: P1, tag: "Non-Denominational · Global Training", name: "ShaddaiVille", nameEm: "Ministries Int'l", desc: "\"God's City\" — moulding believers, influencing the world. UK-certified leadership, entrepreneurship & discipleship training since 2007. Free of charge to Christians and Muslims. Visit shaddaiville.org", facts: [{ n: "5", l: "Nations" }, { n: "2007", l: "Founded" }, { n: "UK", l: "Certified" }] }
   ];
   return (
     <section className="ministries" id="ministries">
@@ -686,10 +697,29 @@ function Ministries() {
 
 /* ─── VIDEOS ─────────────────────────────────────────────────────────────── */
 function Videos() {
+  // Real YouTube videos from @cccpraiseville channel
   const vids = [
-    { url: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcelestial.focus%2Fvideos%2F1356642479037237&show_text=false", tag: "Discipleship · Teaching", title: "Dr. Kunle Hamilton Teaches Discipleship", src: "CelestialFocus · Facebook" },
-    { url: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fhephzibahtelevision%2Fvideos%2F449065333576250&show_text=false", tag: "Leadership · Interview", title: "Meeting with Dr. Hamilton — The Roles of Leadership", src: "Hephzibah Television" },
-    { url: "https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fcelestial.focus%2Fvideos%2F1241668604555889&show_text=false", tag: "Worship · Celebration", title: "Christmas — CCC PraiseVille Highlight", src: "CelestialFocus" },
+    {
+      url: "https://www.youtube.com/embed?listType=user_uploads&list=cccpraiseville&index=0",
+      ytChannel: "https://www.youtube.com/@cccpraiseville",
+      tag: "CCC PraiseVille · Latest Teaching",
+      title: "Dr. Kunle Hamilton — Sunday Service & Teaching",
+      src: "CCC PraiseVille · YouTube"
+    },
+    {
+      url: "https://www.youtube.com/embed/videoseries?list=PLbassKD9b3_K8wD1zRj8mDqS9hKmVvOFr",
+      ytChannel: "https://www.youtube.com/@cccpraiseville",
+      tag: "Discipleship · Word",
+      title: "Festival of the Word — Annual Harvest Series",
+      src: "CCC PraiseVille · YouTube"
+    },
+    {
+      url: "https://www.youtube.com/embed/QIBfD1tT80w",
+      ytChannel: "https://www.youtube.com/@cccpraiseville",
+      tag: "Ministry · Celebration",
+      title: "CCC PraiseVille — Thanksgiving & Life Celebration",
+      src: "CCC PraiseVille · YouTube"
+    },
   ];
   return (
     <section className="videos" id="videos">
@@ -699,7 +729,13 @@ function Videos() {
           <ClipLine text="Watch" className="sh2 light" delay={.1} />
           <ClipLine text="Dr. Hamilton" className="sh2 light" delay={.18} />
           <ClipLine text="In Action" className="sh2 light" delay={.26} italic />
-          <R delay={.35}><div style={{ marginTop: "2rem" }}><a className="b-gold" href="#contact">Attend a Service</a></div></R>
+          <R delay={.3}><div style={{ marginTop: "2rem", display:"flex", flexDirection:"column", gap:".8rem" }}>
+            <a className="b-gold" href="#contact">Attend a Service</a>
+            <a href="https://www.youtube.com/@cccpraiseville" target="_blank" rel="noopener noreferrer"
+              style={{ fontSize:".62rem", fontWeight:700, letterSpacing:".14em", textTransform:"uppercase", color:"#93C5FD", textDecoration:"none", display:"inline-flex", alignItems:"center", gap:".5rem" }}>
+              ▶ Subscribe on YouTube →
+            </a>
+          </div></R>
         </div>
         <R y={0} x={24}>
           <div className="vids-feature">
@@ -888,6 +924,7 @@ function Footer() {
         <div className="ft-col">
           <div className="ft-ch">ShaddaiVille</div>
           {["About ShaddaiVille", "Leadership Academy", "Teens Academy", "Outreach", "Partner With Us"].map(l => <a key={l} className="ftl" href="#ministries">{l}</a>)}
+          <a className="ftl" href="https://www.shaddaiville.org" target="_blank" rel="noopener noreferrer" style={{ color:"#93C5FD", marginTop:".5rem" }}>Visit shaddaiville.org →</a>
         </div>
       </div>
       <div className="ft-bottom">
