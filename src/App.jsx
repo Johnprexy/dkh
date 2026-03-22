@@ -5,8 +5,11 @@ import {
   useMotionValue, useSpring, animate
 } from "framer-motion";
 
+// IMG_1665 — white garment + blue sash, forward-facing mic — HERO
 const P1 = "/dkh-hero.jpg";
+// IMG_1666 — CelestialFocus teaching shot — ABOUT / CONTACT / PANELS
 const P2 = "/dkh-teaching.jpg";
+// Original formal headshot — supplementary panels
 const P3 = "/dkh-formal.jpg";
 
 /* ─── STYLES ──────────────────────────────────────────────────────────────── */
@@ -83,8 +86,8 @@ const Styles = () => (
     }
     .hero-photo {
       position:absolute; inset:0; width:100%; height:100%;
-      object-fit:cover; object-position:center top;
-      filter:brightness(.72) contrast(1.06);
+      object-fit:cover; object-position:center 15%;
+      filter:brightness(.75) contrast(1.08);
     }
     /* Gradient: dark bottom-left where text lives, clear top-right for face */
     .hero-overlay {
@@ -166,7 +169,7 @@ const Styles = () => (
     @media(max-width:900px){.about{grid-template-columns:1fr}}
     .about-photo { position:relative; overflow:hidden; min-height:660px; }
     @media(max-width:900px){.about-photo{min-height:75vw;max-height:560px}}
-    .about-photo img { width:100%; height:100%; object-fit:cover; object-position:top center; filter:brightness(.85) contrast(1.05); transition:transform .8s ease; }
+    .about-photo img { width:100%; height:100%; object-fit:cover; object-position:center 10%; filter:brightness(.85) contrast(1.05); transition:transform .8s ease; }
     .about-photo:hover img { transform:scale(1.03); }
     .about-photo-ov { position:absolute; inset:0; background:linear-gradient(to top,rgba(13,13,13,.9) 0%,transparent 50%); }
     .about-q { position:absolute; bottom:0; left:0; right:0; padding:2rem 2.5rem; }
@@ -274,7 +277,7 @@ const Styles = () => (
     @media(max-width:900px){.contact{grid-template-columns:1fr}}
     .ct-img { position:relative; overflow:hidden; min-height:640px; }
     @media(max-width:900px){.ct-img{min-height:65vw;max-height:520px}}
-    .ct-img img { width:100%; height:100%; object-fit:cover; object-position:top; filter:brightness(.78) contrast(1.05); transition:transform .8s; }
+    .ct-img img { width:100%; height:100%; object-fit:cover; object-position:center 10%; filter:brightness(.78) contrast(1.05); transition:transform .8s; }
     .ct-img:hover img{transform:scale(1.03)}
     .ct-img-ov { position:absolute; inset:0; background:linear-gradient(to top,rgba(13,13,13,.8) 0%,transparent 55%); }
     .ct-img-label { position:absolute; bottom:2.5rem; left:2.5rem; right:2.5rem; }
@@ -602,8 +605,8 @@ function About() {
 /* ─── MINISTRIES ─────────────────────────────────────────────────────────── */
 function Ministries() {
   const panels = [
-    { img: P1, tag: "Celestial Church of Christ", name: "CCC PraiseVille", nameEm: "Global", desc: "Founded in Berlin on May 8 2016, now flourishing across Nigeria, UK, USA and Germany. Authentic worship, genuine prophecy, deep fellowship — the Celestial Church alive in the modern world.", facts: [{ n: "4+", l: "Countries" }, { n: "2016", l: "Founded" }, { n: "7+", l: "Annual Harvest" }] },
-    { img: P2, tag: "Non-Denominational · Global Training", name: "ShaddaiVille", nameEm: "Ministries Int'l", desc: "\"God's City\" — UK-certified leadership & entrepreneurship since 2007. Free of charge. Christians and Muslims trained together as moral beacons across five nations.", facts: [{ n: "5", l: "Nations" }, { n: "2007", l: "Founded" }, { n: "UK", l: "Certified" }] }
+    { img: P2, tag: "Celestial Church of Christ", name: "CCC PraiseVille", nameEm: "Global", desc: "Founded in Berlin on May 8 2016, now flourishing across Nigeria, UK, USA and Germany. Authentic worship, genuine prophecy, deep fellowship — the Celestial Church alive in the modern world.", facts: [{ n: "4+", l: "Countries" }, { n: "2016", l: "Founded" }, { n: "7+", l: "Annual Harvest" }] },
+    { img: P1, tag: "Non-Denominational · Global Training", name: "ShaddaiVille", nameEm: "Ministries Int'l", desc: "\"God's City\" — UK-certified leadership & entrepreneurship since 2007. Free of charge. Christians and Muslims trained together as moral beacons across five nations.", facts: [{ n: "5", l: "Nations" }, { n: "2007", l: "Founded" }, { n: "UK", l: "Certified" }] }
   ];
   return (
     <section className="ministries" id="ministries">
