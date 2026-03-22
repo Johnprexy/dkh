@@ -288,10 +288,11 @@ const Styles = () => (
     /* ── BOOKS ── warm bg */
     .books { background:var(--warm2); border-top:1px solid var(--border-l); }
     .books-hd { padding:6rem 7vw; border-bottom:1px solid var(--border-l); }
-    .books-grid { display:grid; grid-template-columns:repeat(3,1fr); background:var(--warm); }
-    @media(max-width:900px){.books-grid{grid-template-columns:1fr}}
+    .books-grid { display:grid; grid-template-columns:repeat(4,1fr); background:var(--warm); }
+    @media(max-width:1100px){.books-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.books-grid{grid-template-columns:1fr}}
     .bk { padding:3.5rem 4vw; border-right:1px solid var(--border-l); transition:background .3s; cursor:none; position:relative; overflow:hidden; }
-    .bk:last-child{border-right:none}
+    .bk:nth-child(4n){border-right:none}
     .bk:hover{background:var(--warm2)}
     @media(max-width:900px){.bk{border-right:none;border-bottom:1px solid var(--border-l);cursor:auto}}
     .bk::before { content:''; position:absolute; top:0; left:0; width:0; height:2px; background:var(--gold); transition:width .5s; }
@@ -593,7 +594,7 @@ function Marquee() {
 function Stats() {
   return (
     <div className="stats-strip">
-      {[{ n: "40", s: "+", l: "Years of Ministry & Media" }, { n: "18", s: "", l: "Countries — Books Published" }, { n: "5", s: "", l: "Nations of Impact" }, { n: "1985", s: "", l: "First Class Graduate, UNILAG" }].map((s, i) => (
+      {[{ n: "40", s: "+", l: "Years of Ministry & Media" }, { n: "4", s: "+", l: "Published Books" }, { n: "5", s: "", l: "Nations of Impact" }, { n: "1985", s: "", l: "First Class Graduate, UNILAG" }].map((s, i) => (
         <motion.div key={i} className="stat"
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ delay: i * .1, duration: .7 }}>
@@ -788,9 +789,34 @@ function Books() {
       </div>
       <div className="books-grid">
         {[
-          { tag: "Leadership · Self-Development", title: "Releasing the Eagle in You", p: "Dr. Hamilton's landmark work on leadership and self-actualization. An eight-chapter guide to unlocking the God-given greatness inside every person. Published by Lambert Academic Publishing across 18 countries in Europe." },
-          { tag: "Philosophy · Communication", title: "Journey to Understanding", p: "A rare academic work from a prophet-scholar — investigating how style and content shape understanding, using his Sunday congregation and his radio show on Raypower 100.5 FM as the living laboratory." },
-          { tag: "Faith · Nation-Building", title: "The ShaddaiVille Vision", p: "The blueprint behind a ministry that has trained Christians, Muslims and secular professionals free of charge across five nations since 2007. A framework for discipleship that transcends church walls." },
+          {
+            tag: "Leadership · Self-Development",
+            title: "Releasing the Eagle in You",
+            p: "Dr. Hamilton's landmark inspirational work on leadership and self-actualization — an eight-chapter guide to unlocking the God-given greatness inside every person. Published by Lambert Academic Publishing across 18 countries in Europe.",
+            pub: "Lambert Academic Publishing",
+            link: "https://www.amazon.com"
+          },
+          {
+            tag: "Communication · Church Studies",
+            title: "Journey to Understanding",
+            p: "An academic investigation into how style and content shape audience understanding. Dr. Hamilton uses his own Nigerian church congregation and his Raypower 100.5 FM radio programme as the living laboratory.",
+            pub: "Lambert Academic Publishing · Amazon.com.be",
+            link: "https://www.amazon.com.be"
+          },
+          {
+            tag: "Politics · Digital Media",
+            title: "New Media and Democracy",
+            p: "Nigeria's President and the Facebook Example. A pioneering study of how former President Goodluck Jonathan used Facebook in his 2011 campaign — one of Africa's first serious analyses of social media and electoral politics.",
+            pub: "Lambert Academic Publishing · Amazon.com",
+            link: "https://www.amazon.com"
+          },
+          {
+            tag: "Film · Media Studies",
+            title: "Nollywood and the Challenge of Movie Subtitles",
+            p: "Co-authored with Yomi Daramola. A critical assessment of the Nollywood movie industry and the challenge of subtitling for global audiences — bridging Nigeria's film industry with international media scholarship.",
+            pub: "Lambert Academic Publishing · Amazon.com.be",
+            link: "https://www.amazon.com.be"
+          },
         ].map((b, i) => (
           <R key={i} delay={i * .12}>
             <div className="bk">
@@ -798,7 +824,11 @@ function Books() {
               <div className="bk-tag">{b.tag}</div>
               <div className="bk-title">{b.title}</div>
               <div className="bk-p">{b.p}</div>
-              <a className="bk-cta" href="#contact">Request a Copy →</a>
+              <div style={{ fontSize:".6rem", fontWeight:500, color:"var(--muted-l)", letterSpacing:".06em", marginBottom:"1.2rem", lineHeight:1.5 }}>{b.pub}</div>
+              <div style={{ display:"flex", gap:".7rem", flexWrap:"wrap" }}>
+                <a className="bk-cta" href={b.link} target="_blank" rel="noopener noreferrer">View on Amazon →</a>
+                <a className="bk-cta" href="#contact" style={{ background:"transparent", color:"var(--muted-l)", borderBottom:"1px solid var(--border-l)" }}>Request Copy</a>
+              </div>
             </div>
           </R>
         ))}
